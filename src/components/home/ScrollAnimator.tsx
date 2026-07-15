@@ -1,29 +1,37 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, ReactNode } from "react";
+import Image from "next/image";
 
-export default function ScrollSequence() {
+interface ScrollAnimatorProps {
+  children?: ReactNode;
+}
+
+export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const frameCount = 102; // 000.webp to 101.webp
 
   useEffect(() => {
-    // Preload images
     const loadedImages: HTMLImageElement[] = [];
     let loadedCount = 0;
     
     for (let i = 0; i < frameCount; i++) {
-      const img = new Image();
+      const img = new window.Image();
       const paddedIndex = i.toString().padStart(3, "0");
       img.src = `/heroscroll/${paddedIndex}.webp`;
       
       img.onload = () => {
         loadedCount++;
+        
+        // Draw the very first frame immediately so there is no blank canvas
+        if (i === 0) {
+          drawFrame(0, loadedImages);
+        }
+
         if (loadedCount === frameCount) {
           setImages(loadedImages);
-          // Draw first frame immediately
-          drawFrame(0, loadedImages);
         }
       };
       loadedImages.push(img);
@@ -36,7 +44,6 @@ export default function ScrollSequence() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     
-    // Maintain aspect ratio and cover canvas
     const img = imgArray[index];
     const canvasRatio = canvas.width / canvas.height;
     const imgRatio = img.width / img.height;
@@ -71,6 +78,8 @@ export default function ScrollSequence() {
         return;
       }
 
+      // Height is 300vh, windowHeight is 100vh. ScrollRange = 200vh.
+      // This means the user must scroll 2 full viewport heights to complete the animation.
       const scrollRange = height - windowHeight;
       const scrollPosition = -top;
       
@@ -87,7 +96,7 @@ export default function ScrollSequence() {
       if (canvasRef.current) {
         canvasRef.current.width = window.innerWidth;
         canvasRef.current.height = window.innerHeight;
-        handleScroll(); // redraw based on new size
+        handleScroll();
       }
     };
     
@@ -102,21 +111,22 @@ export default function ScrollSequence() {
 
   return (
     <section ref={containerRef} style={{ height: "300vh", position: "relative" }}>
-      <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden", backgroundColor: "#f9f9f9" }}>
+      <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden", backgroundColor: "#000" }}>
+        
+        {/* Fallback Next Image - full opacity initially, fades out once canvas takes over completely */}
+        <div className={`absolute inset-0 z-0 transition-opacity duration-700 ${images.length === frameCount ? 'opacity-0' : 'opacity-100'}`}>
+            <Image src="/heroscroll/000.webp" alt="Hero Background" fill className="object-cover" priority />
+        </div>
+        
         <canvas 
           ref={canvasRef} 
+          className="relative z-10"
           style={{ width: "100%", height: "100%", display: "block" }}
         />
-        {/* Overlay typography matching a premium baby brand */}
-        <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", color: "#111", pointerEvents: "none" }}>
-            <h2 style={{ fontSize: "clamp(3rem, 5vw, 6rem)", fontWeight: "300", letterSpacing: "-0.04em", margin: 0, textShadow: "0px 4px 32px rgba(255,255,255,0.9)" }}>
-              Pure Comfort
-            </h2>
-            <p style={{ fontSize: "clamp(1rem, 2vw, 1.5rem)", fontWeight: "400", color: "#444", marginTop: "1rem" }}>
-              Engineered for your baby's safety.
-            </p>
-        </div>
       </div>
+      
+      {/* Accepts atomic UI components like HeroOverlay to render over the scroll animation */}
+      {children}
     </section>
   );
 }
