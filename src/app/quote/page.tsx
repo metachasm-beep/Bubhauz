@@ -3,6 +3,7 @@
 import { useState } from "react";
 import StatusBanner from "@/components/ui/StatusBanner";
 import Link from "next/link";
+import ShinyText from "@/components/react-bits/ShinyText";
 
 export default function RequestQuotePage() {
   const [step, setStep] = useState(1);
