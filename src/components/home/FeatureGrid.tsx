@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ScrollReveal from '../react-bits/ScrollReveal';
 import CircularGallery from '../react-bits/CircularGallery';
 import SearchFirstHub from './SearchFirstHub';
+import ProductLens from './ProductLens';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -39,6 +40,11 @@ export default function FeatureGrid() {
         <SearchFirstHub />
       </div>
       
+      {/* Microscopic Product Lens */}
+      <div className="w-full relative z-10 mb-20">
+        <ProductLens />
+      </div>
+
       {/* Product Circular Gallery */}
       <div className="w-full h-[600px] relative z-10 mt-10">
         <h3 className="text-center text-3xl font-bold text-[var(--primary)] mb-4">Our Curated Collection</h3>
