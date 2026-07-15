@@ -67,7 +67,9 @@ export default function RequestQuotePage() {
            <Link href="/" className="text-[var(--text-muted)] hover:text-[var(--primary)] font-bold text-sm mb-4 inline-block">← Back Home</Link>
            {(!success) && (
              <div className="flex items-center justify-between mt-2">
-               <h1 className="text-3xl font-bold text-[var(--primary)]">Let's Chat!</h1>
+               <h1 className="text-3xl font-bold text-[var(--primary)]">
+                 <ShinyText text="Let's Chat!" disabled={false} speed={3} className="inline-block" />
+               </h1>
                <div className="bg-white/60 px-4 py-2 rounded-full text-sm font-bold text-[var(--foreground)] shadow-sm">
                  Step {step} of 3
                </div>
