@@ -167,7 +167,12 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         gsap.set(".fold-wrapper", { autoAlpha: (i) => i === 0 ? 1 : 0 }); 
       }
 
-      // ---- CANVAS SEQUENCE 0 (Hero Anim - NO TEXT) ----
+      // ---- HERO INTERNAL ANIMATIONS (Happens instantly on load / scroll 0) ----
+      gsap.to(".hero-title-word", { opacity: 1, y: 0, filter: "blur(0px)", stagger: 0.2, duration: 1, ease: "power2.out", delay: 0.2 });
+      gsap.to(".hero-subtitle", { opacity: 1, x: 0, duration: 1, ease: "power2.out", delay: 0.8 });
+      gsap.to(".hero-button", { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)", delay: 1.1 });
+
+      // ---- CANVAS SEQUENCE 0 (Hero Anim) ----
       const frameTracker = [0, -1, -1]; // Tracks the current frame of each sequence
       
       tl.add("canvas-anim-0");
