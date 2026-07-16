@@ -177,7 +177,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       tl.to({}, { duration: 1 }); // Pause to read
 
       // ---- CANVAS SEQUENCE 0 (Second scroll: Canvas Anim) ----
-      const frameTracker = frameTrackerRef.current; // Tracks the current frame of each sequence
+      const frameTracker = [0, -1, -1]; // Tracks the current frame of each sequence
       
       tl.add("canvas-anim-0");
       const frameObj0 = { frame: 0 };
