@@ -42,7 +42,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     for (let i = 0; i < frameCount1; i++) {
       const img = new window.Image();
       const paddedIndex = i.toString().padStart(3, "0");
-      img.src = `/heroscroll/${paddedIndex}.webp`;
+      img.src = `/heroscroll/${paddedIndex}.webp?v=1`;
       img.onload = () => {
         loadedCount1++;
         if (i === 0) drawFrame([0]);
@@ -55,7 +55,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     for (let i = 0; i < frameCount2; i++) {
       const img = new window.Image();
       const paddedIndex = i.toString().padStart(3, "0");
-      img.src = `/scroll2/use_the_clouds_whirlwind_image-ezremove_${paddedIndex}.webp`;
+      img.src = `/scroll2/use_the_clouds_whirlwind_image-ezremove_${paddedIndex}.webp?v=1`;
       img.onload = () => {
         loadedCount2++;
         if (loadedCount2 === frameCount2) setSeq2Images(loadedSeq2);
@@ -67,7 +67,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     for (let i = 0; i < frameCount3; i++) {
       const img = new window.Image();
       const paddedIndex = i.toString().padStart(3, "0");
-      img.src = `/scroll3/use_the_baby_apparel_image_as-ezremove_${paddedIndex}.webp`;
+      img.src = `/scroll3/use_the_baby_apparel_image_as-ezremove_${paddedIndex}.webp?v=1`;
       img.onload = () => {
         loadedCount3++;
         if (loadedCount3 === frameCount3) setSeq3Images(loadedSeq3);
