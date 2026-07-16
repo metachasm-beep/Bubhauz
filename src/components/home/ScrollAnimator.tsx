@@ -168,14 +168,18 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         gsap.set(".fold-wrapper", { autoAlpha: (i) => i === 0 ? 1 : 0 }); 
       }
 
-      // ---- HERO INTERNAL ANIMATIONS (Happens instantly on load / scroll 0) ----
-      tl.to(".hero-title-word", { opacity: 1, y: 0, filter: "blur(0px)", stagger: 0.2, duration: 1, ease: "power2.out" })
-      .to(".hero-subtitle", { opacity: 1, x: 0, duration: 1, ease: "power2.out" }, "-=0.5")
-      .to(".hero-button", { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)" }, "-=0.5");
-
-      // ---- CANVAS SEQUENCE 0 (Base layer) ----
-      const frameTracker = [0, -1, -1]; // Tracks the current frame of each sequence
+      // ---- HERO INTERNAL ANIMATIONS (First scroll: Text In) ----
+      tl.add("hero-text-in");
+      tl.to(".hero-title-word", { opacity: 1, y: 0, filter: "blur(0px)", stagger: 0.2, duration: 1, ease: "power2.out" }, "hero-text-in")
+      .to(".hero-subtitle", { opacity: 1, x: 0, duration: 1, ease: "power2.out" }, "hero-text-in+=0.5")
+      .to(".hero-button", { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)" }, "hero-text-in+=0.8");
       
+      tl.to({}, { duration: 1 }); // Pause to read
+
+      // ---- CANVAS SEQUENCE 0 (Second scroll: Canvas Anim) ----
+      const frameTracker = frameTrackerRef.current; // Tracks the current frame of each sequence
+      
+      tl.add("canvas-anim-0");
       const frameObj0 = { frame: 0 };
       tl.to(frameObj0, {
         frame: frameCounts[0] - 1,
@@ -186,14 +190,19 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
            frameTracker[0] = frameObj0.frame;
            drawFrame(frameTracker);
         }
-      });
+      }, "canvas-anim-0");
+      
+      tl.to({}, { duration: 0.5 }); // Small pause before transitioning out
 
       // ---- UNIVERSAL PARALLAX SLIDER ----
       // Loop over every subsequent fold and slide it up with a parallax effect
       for (let i = 1; i < foldCount; i++) {
-        const transitionLabel = `transition-${i}`;
-        // Fold 3 (i=2) needs to scroll slower, so we give it a longer timeline duration
-        const duration = i === 2 ? 6 : 3; 
+        const animLabel = `canvas-anim-${i}`;
+        const textLabel = `text-in-${i}`;
+        const duration = 3; 
+        
+        // --- PHASE: CANVAS ANIMATION & PREVIOUS TEXT OUT ---
+        tl.add(animLabel);
         
         // If there is a canvas sequence corresponding to this fold transition, play it!
         if (i < sequences.length) {
@@ -211,34 +220,39 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
               frameTracker[i] = seqObj.frame;
               drawFrame(frameTracker);
             }
-          }, transitionLabel);
+          }, animLabel);
         }
         
         // Parallax Transition between Fold[i-1] and Fold[i]
-        // Fold i-1 moves up slowly (depth effect) and fades out slightly
+        // Fold i-1 moves up slowly (depth effect) and fades out completely
         tl.to(`.fold-${i - 1}`, { 
            yPercent: -50, 
            opacity: 0,  
            duration: duration,
            ease: "power2.inOut" 
-        }, transitionLabel)
-        // Fold i moves up quickly from the bottom
-        .to(`.fold-${i}`, { 
+        }, animLabel);
+        
+        // Fold i moves up quickly from the bottom, becoming visible but its text stays hidden
+        tl.to(`.fold-${i}`, { 
            yPercent: 0, 
            autoAlpha: 1, 
            duration: duration,
            ease: "power2.inOut" 
-        }, transitionLabel);
+        }, animLabel);
         
-        // Specific internal animations for known folds
+        tl.to({}, { duration: 0.5 }); // Pause before text comes in
+        
+        // --- PHASE: TEXT IN ---
+        tl.add(textLabel);
+        
         if (i === 1) { // Wardrobe (Fold 2)
-          tl.to(".wardrobe-title", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, `${transitionLabel}+=1.5`)
-          .to(".wardrobe-subtitle", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, `${transitionLabel}+=1.5`)
-          .to(".wardrobe-button", { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }, `${transitionLabel}+=1.5`);
+          tl.to(".wardrobe-title", { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, textLabel)
+          .to(".wardrobe-subtitle", { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, `${textLabel}+=0.3`)
+          .to(".wardrobe-button", { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)" }, `${textLabel}+=0.6`);
         } else if (i === 2) { // Nourish (Fold 3)
-          tl.to(".nourish-title", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, `${transitionLabel}+=1.5`)
-          .to(".nourish-subtitle", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, `${transitionLabel}+=1.5`)
-          .to(".nourish-button", { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }, `${transitionLabel}+=1.5`);
+          tl.to(".nourish-title", { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, textLabel)
+          .to(".nourish-subtitle", { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, `${textLabel}+=0.3`)
+          .to(".nourish-button", { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)" }, `${textLabel}+=0.6`);
         }
         
         // Pause for user to read this fold before next scrub
@@ -246,6 +260,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       }
 
       // ---- TRANSITION IN FOOTER OVERLAY ----
+      tl.add("footerIn");
       tl.to("#global-footer", { 
         opacity: 1, 
         pointerEvents: "auto",
