@@ -123,26 +123,17 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         onUpdate: () => drawFrame(frameObj1.frame, seq1Images)
       });
 
-      // Phase 3: Hold for interaction (Fold 1)
-      tl.to({}, { duration: 1 });
-
-      // Phase 4: Transition out Hero (Pure fade, no spatial movement)
-      tl.to(canvasRef.current, { opacity: 0, duration: 0.5 }, "transitionOut")
-      .to(".hero-overlay-container", { opacity: 0, duration: 0.5 }, "transitionOut");
-
-      // ---- FOLD 2: MINI WARDROBE ----
-      // Switch canvas source while it is invisible
-      tl.set(canvasRef.current, { 
+      // Phase 3: Transition out Hero & Switch to Seq 2 & Fade in Wardrobe text
+      // Instant transition: Hero text fades out, Wardrobe text fades in, canvas swaps
+      tl.to(".hero-overlay-container", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, "transition")
+      .set(canvasRef.current, { 
         onComplete: () => drawFrame(0, seq2Images),
         onReverseComplete: () => drawFrame(frameCount1 - 1, seq1Images)
-      });
-
-      // Phase 5: Fade in Sequence 2 Canvas and Wardrobe Text
-      tl.to(canvasRef.current, { opacity: 1, duration: 1 }, "transitionIn")
-      .to(".wardrobe-overlay-container", { opacity: 1, duration: 0.1 }, "transitionIn")
-      .to(".wardrobe-title", { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, "transitionIn")
-      .to(".wardrobe-subtitle", { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, "-=0.5")
-      .to(".wardrobe-button", { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)" }, "-=0.5");
+      }, "transition")
+      .to(".wardrobe-overlay-container", { opacity: 1, duration: 0.1 }, "transition")
+      .to(".wardrobe-title", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, "transition")
+      .to(".wardrobe-subtitle", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, "transition")
+      .to(".wardrobe-button", { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }, "transition");
 
       // Phase 6: Canvas Image Sequence 2
       const frameObj2 = { frame: 0 };
