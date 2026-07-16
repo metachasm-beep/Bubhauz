@@ -1,16 +1,14 @@
 # Goal Description
-The current implementation uses `ScrollTrigger`, which relies on extending the physical height of the webpage (adding thousands of pixels of scroll space) and "pinning" the visual content. Even though it's pinned, the browser still registers physical scrolling, which causes scrollbars to appear and can result in jitter or a feeling of "physically scrolling down".
+The "zero physical scroll" approach failed because the CSS `:has()` pseudo-selector (which I used to hide the scrollbar and footer) is not fully supported in all browser environments, causing the rule to be ignored. As a result, the browser still generated a physical scrollbar and scrolled down to the global footer.
 
-To achieve a true "locked viewport" where the webpage is strictly 100vh tall and the mouse wheel ONLY drives the animation, we need to completely abandon native scrolling.
+To fix this with 100% cross-browser reliability, I will use React's `useEffect` hook to aggressively apply inline styles that lock the viewport and hide the global footer via JavaScript when the homepage loads.
 
 ## User Review Required
 > [!IMPORTANT]  
-> I will refactor the codebase to use GSAP's **Observer** plugin instead of `ScrollTrigger`.
-> This means the website's physical height will be locked to exactly 100% of your screen height (`overflow: hidden`). 
-> There will be **no scrollbars**, and the page will **never physically scroll**. 
-> Instead, we will listen directly to your mouse wheel (or trackpad/touch swipes) to manually scrub the animation timeline forward and backward. 
+> This approach uses JavaScript to directly manipulate the `<body>` and `<html>` tags the moment you land on the homepage, forcing them to `overflow: hidden` and `height: 100vh`. 
+> This is a bulletproof method that bypasses any CSS compatibility issues, ensuring the browser is physically incapable of scrolling.
 
 ## Proposed Changes
-1. **Remove ScrollTrigger**: I will strip out all `ScrollTrigger` and pinning logic from `ScrollAnimator.tsx`.
-2. **Lock Body Overflow**: I will ensure `page.tsx` and the container are locked to `100vh` with `overflow-hidden`.
-3. **Implement GSAP Observer**: I will use `gsap/Observer` to capture `onWheel` and `onDrag` events, translating your physical gestures directly into timeline progress (e.g., every scroll tick advances the animation by a set percentage).
+1. **Bulletproof Viewport Lock**: Update `ScrollAnimator.tsx` to include a `useEffect` hook that explicitly sets `document.body.style.overflow = 'hidden'` and `document.documentElement.style.overflow = 'hidden'` on mount (and restores them on unmount).
+2. **Hide Global Footer**: Add `id="global-footer"` to `SiteFooter.tsx`, and use JavaScript in `ScrollAnimator.tsx` to hide it when on the homepage, leaving only our fade-in overlay footer.
+3. **Remove CSS Hack**: Remove the brittle `:has()` selectors from `globals.css`.

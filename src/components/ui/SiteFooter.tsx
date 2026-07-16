@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function SiteFooter() {
   return (
-    <footer className="w-full bg-[var(--foreground)] text-white py-16 px-4 z-40 relative mt-auto">
+    <footer id="global-footer" className="w-full bg-[var(--foreground)] text-white py-16 px-4 z-40 relative mt-auto">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
         
         {/* Brand & Mission */}

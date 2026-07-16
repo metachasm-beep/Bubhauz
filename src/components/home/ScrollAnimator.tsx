@@ -53,6 +53,32 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     }
   }, []);
 
+  // Bulletproof viewport lock and global footer hider
+  useEffect(() => {
+    // 1. Force zero physical scroll via JS styles on mount
+    document.documentElement.style.overflow = "hidden";
+    document.documentElement.style.height = "100vh";
+    document.body.style.overflow = "hidden";
+    document.body.style.height = "100vh";
+    
+    // 2. Hide the physical layout footer if it exists
+    const globalFooter = document.getElementById("global-footer");
+    if (globalFooter) {
+      globalFooter.style.display = "none";
+    }
+
+    // Cleanup on unmount (if they navigate away from home)
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.documentElement.style.height = "";
+      document.body.style.overflow = "";
+      document.body.style.height = "";
+      if (globalFooter) {
+        globalFooter.style.display = "";
+      }
+    };
+  }, []);
+
   const drawFrame = (index: number, imgArray: HTMLImageElement[]) => {
     if (!canvasRef.current || !imgArray[index]) return;
     const canvas = canvasRef.current;
