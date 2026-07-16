@@ -97,3 +97,8 @@ body {
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
+
+/* Hide global footer on the homepage so we can animate it in via GSAP */
+body:has(main.home-page-no-footer) > footer {
+  display: none !important;
+}

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, ReactNode } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import SiteFooter from "@/components/ui/SiteFooter";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -148,9 +149,13 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       // Phase 7: Hold for interaction (Fold 2)
       tl.to({}, { duration: 1 });
 
-      // Phase 8: Transition out Wardrobe Fold (Pure fade)
-      tl.to(canvasRef.current, { opacity: 0, duration: 1, ease: "power2.inOut" }, "transitionOut2")
-      .to(".wardrobe-overlay-container", { opacity: 0, duration: 1, ease: "power2.inOut" }, "transitionOut2");
+      // Phase 8: Transition in Footer Overlay (No physical scroll)
+      tl.to(".footer-overlay-container", { 
+        opacity: 1, 
+        pointerEvents: "auto",
+        duration: 1, 
+        ease: "power2.inOut" 
+      }, "footerIn");
 
     }, containerRef);
 
@@ -188,6 +193,11 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
 
         {/* Render overlays inside the pinned container */}
         {children}
+
+        {/* Footer Overlay */}
+        <div className="footer-overlay-container absolute bottom-0 left-0 w-full z-40 pointer-events-none" style={{ opacity: 0 }}>
+          <SiteFooter />
+        </div>
       </div>
     </section>
   );

@@ -1,39 +1,13 @@
 # Goal Description
-
-Combine the Hero fold and "The Mini Wardrobe" fold into a single pinned scroll experience. Instead of scrolling down the page physically, the user will scroll within a pinned container to seamlessly transition from the first animation sequence (Hero) to the second animation sequence (The Mini Wardrobe) on the same `<canvas>`.
+The user wants a strict "zero physical scroll" experience on the homepage. The webpage should behave like a locked viewport where scrolling the mouse wheel ONLY drives the animation timelines.
+Currently, after the final animation phase completes, the section unpins, and the page physically scrolls down to reveal the `SiteFooter` (which is located in the global `layout.tsx`).
 
 ## User Review Required
-
-> [!WARNING]
-> This requires refactoring `ScrollAnimator.tsx` to handle two separate image sequences (`/heroscroll/` and `/scroll2/`) within one master GSAP timeline.
-> Since you previously requested to remove all folds without a scroll background, the page will now primarily consist of this one massive pinned section that plays both sequences back-to-back.
+> [!IMPORTANT]  
+> Because the global `SiteFooter` is physically located at the bottom of the page, the browser naturally scrolls down to it after the animation finishes. 
+> To achieve a strict "zero physical scroll" experience on the homepage, we need to handle the footer differently.
 
 ## Proposed Changes
-
-### `src/components/home/ScrollAnimator.tsx`
-- Refactor the image loader to load both `heroscroll` (Sequence 1) and `scroll2` (Sequence 2) arrays.
-- Extend the GSAP timeline's scroll distance (e.g., from `+=400%` to `+=800%`) to accommodate both sequences.
-- Add new timeline phases:
-  - After Phase 4 (Hero Fade Out), introduce Phase 5: Fade in "The Mini Wardrobe" text.
-  - Phase 6: Play the `scroll2` image sequence on the canvas.
-  - Phase 7: Fade out "The Mini Wardrobe" text and canvas.
-- Update the `drawFrame` logic to accept which sequence array to draw from.
-
-### `src/components/home/HeroOverlay.tsx`
-- No major changes needed, it will remain the first child.
-
-### `src/components/home/MiniWardrobeOverlay.tsx` [NEW]
-- Extract the text elements from `MiniWardrobeFold.tsx` into an overlay component similar to `HeroOverlay.tsx`.
-- Class names like `.wardrobe-text` will be animated by the master timeline in `ScrollAnimator.tsx`.
-
-### `src/app/page.tsx`
-- Update the layout to wrap both `HeroOverlay` and `MiniWardrobeOverlay` inside `ScrollAnimator`.
-- Remove `FeatureGrid` and `MiniWardrobeFold` completely as they are no longer needed (since everything happens within the pinned `ScrollAnimator`).
-
-## Verification Plan
-
-### Manual Verification
-- Scroll down the page.
-- Verify the Hero text animates in, the first sequence plays, and then fades out.
-- Verify the page *remains pinned* and immediately transitions into fading in "The Mini Wardrobe" text while playing the `scroll2` cloud animation sequence.
-- Ensure the canvas rendering is smooth and switches image arrays correctly without flickering.
+1. **Remove the Final Fade Out**: I will remove Phase 8 (the fade to black) from the end of the Wardrobe animation so that it gracefully rests on the final frame of the cloud animation.
+2. **Hide the Physical Footer on the Homepage**: I will update `layout.tsx` (or `page.tsx`) so that the `SiteFooter` is completely hidden on the home page. This ensures there is absolutely zero content below the pinned animator, preventing any physical scrolling.
+3. **Optional (Let me know)**: If you still want the footer links accessible on the homepage, I can add a final phase to the timeline that fades the footer in *as an overlay* at the very end of the animation, keeping the viewport locked. Let me know if you prefer this, otherwise I will simply hide it on the homepage.
