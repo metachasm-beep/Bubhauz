@@ -6,7 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ScrollReveal from '../react-bits/ScrollReveal';
 import CircularGallery from '../react-bits/CircularGallery';
 import CategoryShowcase from './CategoryShowcase';
-
+import MiniWardrobeFold from './MiniWardrobeFold';
 gsap.registerPlugin(ScrollTrigger);
 
 export default function FeatureGrid() {
@@ -35,6 +35,9 @@ export default function FeatureGrid() {
       <div className="parallax-blob absolute top-0 left-0 w-96 h-96 bg-[var(--primary)]/10 rounded-full blur-3xl pointer-events-none z-0"></div>
       <div className="parallax-blob absolute bottom-0 right-0 w-[30rem] h-[30rem] bg-[#A3D5D3]/10 rounded-full blur-3xl pointer-events-none z-0"></div>
 
+      <div className="w-full relative z-10">
+        <MiniWardrobeFold />
+      </div>
 
       <div className="w-full relative z-10">
         <CategoryShowcase />

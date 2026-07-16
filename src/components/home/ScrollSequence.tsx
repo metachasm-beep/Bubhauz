@@ -85,7 +85,7 @@ export default function ScrollSequence({
   return (
     <canvas 
       ref={canvasRef} 
-      className="w-full h-full object-cover rounded-[2rem]"
+      className="w-full h-full object-cover"
     />
   );
 }
