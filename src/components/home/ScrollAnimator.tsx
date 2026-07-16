@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState, ReactNode } from "react";
 import Image from "next/image";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Observer } from "gsap/Observer";
 import SiteFooter from "@/components/ui/SiteFooter";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(Observer);
 
 interface ScrollAnimatorProps {
   children?: ReactNode;
@@ -81,7 +81,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
   };
 
-  // GSAP ScrollTrigger Sequence
+  // GSAP Observer Sequence (Zero Physical Scroll)
   useEffect(() => {
     if (seq1Images.length !== frameCount1 || seq2Images.length !== frameCount2 || !containerRef.current) return;
 
@@ -92,33 +92,20 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     }
 
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top top",
-          end: "+=1200%", // 12 full scrolls for both sequences + holds
-          scrub: 1, 
-          pin: true,
-        }
-      });
+      // Create a paused timeline that we will manually scrub using Observer
+      const tl = gsap.timeline({ paused: true });
 
       // ---- FOLD 1: HERO ----
       // Phase 1: Text Reveal
-      tl.to(".hero-title-word", { 
-        opacity: 1, y: 0, filter: "blur(0px)", stagger: 0.2, duration: 1, ease: "power2.out" 
-      })
-      .to(".hero-subtitle", { 
-        opacity: 1, x: 0, duration: 1, ease: "power2.out" 
-      }, "-=0.5")
-      .to(".hero-button", { 
-        opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)" 
-      }, "-=0.5");
+      tl.to(".hero-title-word", { opacity: 1, y: 0, filter: "blur(0px)", stagger: 0.2, duration: 1, ease: "power2.out" })
+      .to(".hero-subtitle", { opacity: 1, x: 0, duration: 1, ease: "power2.out" }, "-=0.5")
+      .to(".hero-button", { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)" }, "-=0.5");
 
       // Phase 2: Canvas Image Sequence 1
       const frameObj1 = { frame: 0 };
       tl.to(frameObj1, {
         frame: frameCount1 - 1,
-        duration: 2.5,
+        duration: 3,
         snap: "frame",
         ease: "none",
         onUpdate: () => drawFrame(frameObj1.frame, seq1Images)
@@ -136,26 +123,54 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       .to(".wardrobe-subtitle", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, "transition")
       .to(".wardrobe-button", { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }, "transition");
 
-      // Phase 6: Canvas Image Sequence 2
+      // Phase 4: Canvas Image Sequence 2
       const frameObj2 = { frame: 0 };
       tl.to(frameObj2, {
         frame: frameCount2 - 1,
-        duration: 2.5,
+        duration: 3,
         snap: "frame",
         ease: "none",
         onUpdate: () => drawFrame(frameObj2.frame, seq2Images)
       });
 
-      // Phase 7: Hold for interaction (Fold 2)
+      // Phase 5: Hold for interaction (Fold 2)
       tl.to({}, { duration: 1 });
 
-      // Phase 8: Transition in Footer Overlay (No physical scroll)
+      // Phase 6: Transition in Footer Overlay (No physical scroll)
       tl.to(".footer-overlay-container", { 
         opacity: 1, 
         pointerEvents: "auto",
         duration: 1, 
         ease: "power2.inOut" 
       }, "footerIn");
+
+
+      // --- OBSERVER: ZERO PHYSICAL SCROLL SCRUBBING ---
+      let scrollProgress = 0;
+      
+      Observer.create({
+        target: window,
+        type: "wheel,touch,pointer",
+        wheelSpeed: -1,
+        tolerance: 10,
+        preventDefault: true, // Absolutely prevents any physical scrolling (elastic bounce, etc)
+        onChange: (self) => {
+          // Convert the pixel delta into a tiny progress increment (tune 0.0005 for speed)
+          const speedMultiplier = 0.0003; 
+          scrollProgress += self.deltaY * speedMultiplier;
+          
+          // Clamp progress strictly between 0 (start) and 1 (end)
+          scrollProgress = Math.max(0, Math.min(1, scrollProgress));
+          
+          // Tween the timeline's progress smoothly
+          gsap.to(tl, {
+            progress: scrollProgress,
+            duration: 0.5,
+            ease: "power3.out",
+            overwrite: "auto"
+          });
+        }
+      });
 
     }, containerRef);
 
@@ -174,7 +189,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
   }, [seq1Images, seq2Images]);
 
   return (
-    <section ref={containerRef} style={{ height: "100vh", position: "relative" }}>
+    <section ref={containerRef} style={{ height: "100vh", position: "relative", overflow: "hidden" }}>
       <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100vh", overflow: "hidden", backgroundColor: "#000" }}>
         
         {/* Fallback Image */}

@@ -102,3 +102,9 @@ body {
 body:has(main.home-page-no-footer) > footer {
   display: none !important;
 }
+
+/* Lock the homepage body to prevent ANY physical scrolling */
+body:has(main.home-page-no-footer) {
+  height: 100vh !important;
+  overflow: hidden !important;
+}
