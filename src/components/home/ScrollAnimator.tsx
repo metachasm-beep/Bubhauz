@@ -126,14 +126,13 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       // Phase 3: Hold for interaction (Fold 1)
       tl.to({}, { duration: 1 });
 
-      // Phase 4: Transition out Hero
-      tl.to(canvasRef.current, { scale: 5, opacity: 0, duration: 1, ease: "power3.in" }, "transitionOut")
-      .to(".hero-overlay-container", { scale: 2, opacity: 0, duration: 1, ease: "power3.in" }, "transitionOut");
+      // Phase 4: Transition out Hero (Pure fade, no spatial movement)
+      tl.to(canvasRef.current, { opacity: 0, duration: 0.5 }, "transitionOut")
+      .to(".hero-overlay-container", { opacity: 0, duration: 0.5 }, "transitionOut");
 
       // ---- FOLD 2: MINI WARDROBE ----
-      // Reset canvas scale for Sequence 2 and ensure it draws the first frame of Sequence 2 before fading in
+      // Switch canvas source while it is invisible
       tl.set(canvasRef.current, { 
-        scale: 1, 
         onComplete: () => drawFrame(0, seq2Images),
         onReverseComplete: () => drawFrame(frameCount1 - 1, seq1Images)
       });
@@ -158,9 +157,9 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       // Phase 7: Hold for interaction (Fold 2)
       tl.to({}, { duration: 1 });
 
-      // Phase 8: Transition out Wardrobe Fold
-      tl.to(canvasRef.current, { scale: 1.5, opacity: 0, duration: 1, ease: "power3.in" }, "transitionOut2")
-      .to(".wardrobe-overlay-container", { scale: 1.5, opacity: 0, duration: 1, ease: "power3.in" }, "transitionOut2");
+      // Phase 8: Transition out Wardrobe Fold (Pure fade)
+      tl.to(canvasRef.current, { opacity: 0, duration: 1, ease: "power2.inOut" }, "transitionOut2")
+      .to(".wardrobe-overlay-container", { opacity: 0, duration: 1, ease: "power2.inOut" }, "transitionOut2");
 
     }, containerRef);
 
