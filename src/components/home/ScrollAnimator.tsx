@@ -85,7 +85,13 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     
     const globalFooter = document.getElementById("global-footer");
     if (globalFooter) {
-      globalFooter.style.display = "none";
+      globalFooter.style.position = "fixed";
+      globalFooter.style.bottom = "0";
+      globalFooter.style.left = "0";
+      globalFooter.style.width = "100%";
+      globalFooter.style.zIndex = "40";
+      globalFooter.style.opacity = "0";
+      globalFooter.style.pointerEvents = "none";
     }
 
     return () => {
@@ -94,7 +100,13 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       document.body.style.overflow = "";
       document.body.style.height = "";
       if (globalFooter) {
-        globalFooter.style.display = "";
+        globalFooter.style.position = "";
+        globalFooter.style.bottom = "";
+        globalFooter.style.left = "";
+        globalFooter.style.width = "";
+        globalFooter.style.zIndex = "";
+        globalFooter.style.opacity = "";
+        globalFooter.style.pointerEvents = "";
       }
     };
   }, []);
@@ -233,7 +245,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       }
 
       // ---- TRANSITION IN FOOTER OVERLAY ----
-      tl.to(".footer-overlay-container", { 
+      tl.to("#global-footer", { 
         opacity: 1, 
         pointerEvents: "auto",
         duration: 1, 
@@ -308,11 +320,6 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
                {child}
              </div>
           ))}
-        </div>
-
-        {/* Footer Overlay */}
-        <div className="footer-overlay-container absolute bottom-0 left-0 w-full z-40 pointer-events-none" style={{ opacity: 0 }}>
-          <SiteFooter />
         </div>
       </div>
     </section>
