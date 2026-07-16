@@ -3,10 +3,10 @@
 import React, { useEffect, useRef, useState, ReactNode, Children } from "react";
 import Image from "next/image";
 import gsap from "gsap";
-import { Observer } from "gsap/Observer";
-import SiteFooter from "@/components/ui/SiteFooter";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-gsap.registerPlugin(Observer);
+gsap.registerPlugin(ScrollTrigger);
+import SiteFooter from "@/components/ui/SiteFooter";
 
 interface ScrollAnimatorProps {
   children?: ReactNode;
@@ -76,13 +76,8 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     }
   }, []);
 
-  // Bulletproof viewport lock and global footer hider
+  // Hide global footer on mount so it can be animated in at the end
   useEffect(() => {
-    document.documentElement.style.overflow = "hidden";
-    document.documentElement.style.height = "100vh";
-    document.body.style.overflow = "hidden";
-    document.body.style.height = "100vh";
-    
     const globalFooter = document.getElementById("global-footer");
     if (globalFooter) {
       globalFooter.style.position = "fixed";
@@ -95,10 +90,6 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     }
 
     return () => {
-      document.documentElement.style.overflow = "";
-      document.documentElement.style.height = "";
-      document.body.style.overflow = "";
-      document.body.style.height = "";
       if (globalFooter) {
         globalFooter.style.position = "";
         globalFooter.style.bottom = "";
@@ -159,7 +150,15 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     }
 
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ paused: true });
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          pin: true,
+          start: "top top",
+          end: "+=12000", // Massive virtual scroll distance
+          scrub: 1, // Smooth scrubbing
+        }
+      });
       const foldCount = folds.length;
 
       // INITIAL STATE SETUP
@@ -267,28 +266,6 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         duration: 1, 
         ease: "power2.inOut" 
       }, "footerIn");
-
-      // --- OBSERVER: ZERO PHYSICAL SCROLL SCRUBBING ---
-      let scrollProgress = 0;
-      
-      Observer.create({
-        target: window,
-        type: "wheel,touch,pointer",
-        tolerance: 10,
-        preventDefault: true, 
-        onChange: (self) => {
-          const speedMultiplier = 0.0005; // Balanced speed for 3 folds
-          scrollProgress += self.deltaY * speedMultiplier;
-          scrollProgress = Math.max(0, Math.min(1, scrollProgress));
-          
-          gsap.to(tl, {
-            progress: scrollProgress,
-            duration: 0.5,
-            ease: "power3.out",
-            overwrite: "auto"
-          });
-        }
-      });
 
     }, containerRef);
 

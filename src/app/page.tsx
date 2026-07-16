@@ -5,7 +5,7 @@ import NourishOverlay from "@/components/home/NourishOverlay";
 
 export default function Home() {
   return (
-    <main className="home-page-no-footer fixed inset-0 w-full h-[100dvh] bg-black overflow-hidden pointer-events-auto">
+    <main className="home-page-no-footer w-full bg-black">
       <ScrollAnimator>
          <HeroOverlay />
          <MiniWardrobeOverlay />
