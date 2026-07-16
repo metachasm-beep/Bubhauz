@@ -8,8 +8,7 @@ const DynamicFeatureGrid = dynamic(() => import('@/components/home/FeatureGrid')
     <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
        <div className="animate-pulse text-[var(--primary)] text-xl font-semibold">Loading experiences...</div>
     </div>
-  ),
-  ssr: false, // Forces client-side only rendering for heavy GSAP/Three.js components
+  )
 });
 
 export default function Home() {
