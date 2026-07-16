@@ -192,7 +192,8 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       // Loop over every subsequent fold and slide it up with a parallax effect
       for (let i = 1; i < foldCount; i++) {
         const transitionLabel = `transition-${i}`;
-        const duration = 3; // Standardize duration
+        // Fold 3 (i=2) needs to scroll slower, so we give it a longer timeline duration
+        const duration = i === 2 ? 6 : 3; 
         
         // If there is a canvas sequence corresponding to this fold transition, play it!
         if (i < sequences.length) {
