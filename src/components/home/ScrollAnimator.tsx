@@ -246,11 +246,10 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       Observer.create({
         target: window,
         type: "wheel,touch,pointer",
-        wheelSpeed: -1,
         tolerance: 10,
         preventDefault: true, 
         onChange: (self) => {
-          const speedMultiplier = 0.00025; // Adjusted slightly for 3 folds
+          const speedMultiplier = 0.0005; // Balanced speed for 3 folds
           scrollProgress += self.deltaY * speedMultiplier;
           scrollProgress = Math.max(0, Math.min(1, scrollProgress));
           
