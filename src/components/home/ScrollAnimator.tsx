@@ -155,8 +155,8 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
           trigger: containerRef.current,
           pin: true,
           start: "top top",
-          end: "+=12000", // Massive virtual scroll distance
-          scrub: 1, // Smooth scrubbing
+          end: "+=5000", // Reduced from 12000 so it takes fewer scrolls!
+          scrub: 1.5, // Increased lag for a smoother, slower feel
         }
       });
       const foldCount = folds.length;
@@ -174,7 +174,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       const frameObj0 = { frame: 0 };
       tl.to(frameObj0, {
         frame: frameCounts[0] - 1,
-        duration: 3,
+        duration: 8, // Stretched out for smoother scrolling
         snap: "frame",
         ease: "none",
         onUpdate: () => {
@@ -183,23 +183,23 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         }
       }, "canvas-anim-0");
       
-      tl.to({}, { duration: 0.5 }); // Small pause before next fold
+      tl.to({}, { duration: 1 }); // Pause before next fold
 
       // ---- UNIVERSAL PARALLAX SLIDER ----
       // Loop over every subsequent fold and slide it up with a parallax effect
       for (let i = 1; i < foldCount; i++) {
         const textLabel = `text-in-${i}`;
         const animLabel = `canvas-anim-${i}`;
-        const duration = 3; 
+        const duration = 8; // HUGE duration relative to the timeline so it maps to a large scroll chunk
         
         // --- PHASE: PREVIOUS TEXT OUT & NEW TEXT IN ---
         tl.add(textLabel);
         
         // Fade out previous fold's wrapper completely
         tl.to(`.fold-${i - 1}`, { 
-           yPercent: -50, 
+           yPercent: -30, // Subtle parallax
            opacity: 0,  
-           duration: duration / 2,
+           duration: 4, // Slow, elegant fade out
            ease: "power2.inOut" 
         }, textLabel);
         
@@ -207,22 +207,22 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         tl.to(`.fold-${i}`, { 
            yPercent: 0, 
            autoAlpha: 1, 
-           duration: duration / 2,
+           duration: 4, // Slow, elegant slide in
            ease: "power2.inOut" 
         }, textLabel);
         
         // Animate the text elements for the current fold
         if (i === 1) { // Wardrobe (Fold 2)
-          tl.to(".wardrobe-title", { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, `${textLabel}+=1.5`)
-          .to(".wardrobe-subtitle", { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, `${textLabel}+=1.8`)
-          .to(".wardrobe-button", { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)" }, `${textLabel}+=2.1`);
+          tl.to(".wardrobe-title", { opacity: 1, y: 0, duration: 2, ease: "power2.out" }, `${textLabel}+=2`)
+          .to(".wardrobe-subtitle", { opacity: 1, y: 0, duration: 2, ease: "power2.out" }, `${textLabel}+=2.5`)
+          .to(".wardrobe-button", { opacity: 1, scale: 1, duration: 2, ease: "back.out(1.7)" }, `${textLabel}+=3`);
         } else if (i === 2) { // Nourish (Fold 3)
-          tl.to(".nourish-title", { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, `${textLabel}+=1.5`)
-          .to(".nourish-subtitle", { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, `${textLabel}+=1.8`)
-          .to(".nourish-button", { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)" }, `${textLabel}+=2.1`);
+          tl.to(".nourish-title", { opacity: 1, y: 0, duration: 2, ease: "power2.out" }, `${textLabel}+=2`)
+          .to(".nourish-subtitle", { opacity: 1, y: 0, duration: 2, ease: "power2.out" }, `${textLabel}+=2.5`)
+          .to(".nourish-button", { opacity: 1, scale: 1, duration: 2, ease: "back.out(1.7)" }, `${textLabel}+=3`);
         }
         
-        tl.to({}, { duration: 1.5 }); // Pause for user to read before canvas scrub starts
+        tl.to({}, { duration: 3 }); // Large pause for user to read before canvas scrub starts
         
         // --- PHASE: CANVAS ANIMATION ---
         tl.add(animLabel);
@@ -246,7 +246,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
           }, animLabel);
         }
         
-        tl.to({}, { duration: 0.5 }); // Small pause before next transition
+        tl.to({}, { duration: 1 }); // Small pause before next transition
       }
 
       // ---- TRANSITION IN FOOTER OVERLAY ----
