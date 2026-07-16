@@ -5,10 +5,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ScrollReveal from '../react-bits/ScrollReveal';
 import CircularGallery from '../react-bits/CircularGallery';
-import SearchFirstHub from './SearchFirstHub';
-import ProductLens from './ProductLens';
-import NightShiftFold from './NightShiftFold';
-import PurityWaterfall from './PurityWaterfall';
+import CategoryShowcase from './CategoryShowcase';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -38,23 +35,9 @@ export default function FeatureGrid() {
       <div className="parallax-blob absolute top-0 left-0 w-96 h-96 bg-[var(--primary)]/10 rounded-full blur-3xl pointer-events-none z-0"></div>
       <div className="parallax-blob absolute bottom-0 right-0 w-[30rem] h-[30rem] bg-[#A3D5D3]/10 rounded-full blur-3xl pointer-events-none z-0"></div>
 
-      <div className="w-full relative z-10 px-4 mb-10">
-        <SearchFirstHub />
-      </div>
-      
-      {/* Purity Waterfall Parallax */}
-      <div className="w-full relative z-10 px-4 mb-10">
-        <PurityWaterfall />
-      </div>
-      
-      {/* Microscopic Product Lens */}
-      <div className="w-full relative z-10 mb-10">
-        <ProductLens />
-      </div>
 
-      {/* The Night Shift Transition */}
-      <div className="w-full relative z-10 px-4 mb-20">
-        <NightShiftFold />
+      <div className="w-full relative z-10">
+        <CategoryShowcase />
       </div>
 
       {/* Product Circular Gallery */}
