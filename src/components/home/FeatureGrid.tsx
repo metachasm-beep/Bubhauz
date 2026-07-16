@@ -3,9 +3,6 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import ScrollReveal from '../react-bits/ScrollReveal';
-import CircularGallery from '../react-bits/CircularGallery';
-import CategoryShowcase from './CategoryShowcase';
 import MiniWardrobeFold from './MiniWardrobeFold';
 gsap.registerPlugin(ScrollTrigger);
 
@@ -39,20 +36,7 @@ export default function FeatureGrid() {
         <MiniWardrobeFold />
       </div>
 
-      <div className="w-full relative z-10">
-        <CategoryShowcase />
-      </div>
 
-      {/* Product Circular Gallery */}
-      <div className="w-full h-[600px] relative z-10 mt-10">
-        <h3 className="text-center text-3xl font-bold text-[var(--primary)] mb-4">Our Curated Collection</h3>
-        <div className="text-center text-lg text-[var(--text-muted)] mb-10 max-w-xl mx-auto h-[40px]">
-          <ScrollReveal baseOpacity={0} enableBlur={true} baseRotation={3} blurStrength={8}>
-            Browse our hand-picked favorites in a continuous, playful loop.
-          </ScrollReveal>
-        </div>
-        <CircularGallery bend={3} textColor="#ffffff" borderRadius={0.05} />
-      </div>
     </section>
   );
 }
