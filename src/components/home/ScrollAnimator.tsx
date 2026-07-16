@@ -15,10 +15,17 @@ interface ScrollAnimatorProps {
 export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLElement>(null);
+  
   const [seq1Images, setSeq1Images] = useState<HTMLImageElement[]>([]);
   const [seq2Images, setSeq2Images] = useState<HTMLImageElement[]>([]);
-  const frameCount1 = 102; // 000.webp to 101.webp
-  const frameCount2 = 102; // 000.webp to 101.webp
+  const [seq3Images, setSeq3Images] = useState<HTMLImageElement[]>([]);
+  
+  const frameCount1 = 102;
+  const frameCount2 = 102;
+  const frameCount3 = 102;
+  
+  const sequences = [seq1Images, seq2Images, seq3Images];
+  const frameCounts = [frameCount1, frameCount2, frameCount3];
   
   const folds = Children.toArray(children);
 
@@ -26,8 +33,10 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
   useEffect(() => {
     const loadedSeq1: HTMLImageElement[] = [];
     const loadedSeq2: HTMLImageElement[] = [];
+    const loadedSeq3: HTMLImageElement[] = [];
     let loadedCount1 = 0;
     let loadedCount2 = 0;
+    let loadedCount3 = 0;
     
     // Load Sequence 1
     for (let i = 0; i < frameCount1; i++) {
@@ -36,7 +45,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       img.src = `/heroscroll/${paddedIndex}.webp`;
       img.onload = () => {
         loadedCount1++;
-        if (i === 0) drawFrame(0, -1, loadedSeq1, []);
+        if (i === 0) drawFrame([0]);
         if (loadedCount1 === frameCount1) setSeq1Images(loadedSeq1);
       };
       loadedSeq1.push(img);
@@ -53,23 +62,32 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       };
       loadedSeq2.push(img);
     }
+
+    // Load Sequence 3
+    for (let i = 0; i < frameCount3; i++) {
+      const img = new window.Image();
+      const paddedIndex = i.toString().padStart(3, "0");
+      img.src = `/scroll3/use_the_baby_apparel_image_as-ezremove_${paddedIndex}.webp`;
+      img.onload = () => {
+        loadedCount3++;
+        if (loadedCount3 === frameCount3) setSeq3Images(loadedSeq3);
+      };
+      loadedSeq3.push(img);
+    }
   }, []);
 
   // Bulletproof viewport lock and global footer hider
   useEffect(() => {
-    // 1. Force zero physical scroll via JS styles on mount
     document.documentElement.style.overflow = "hidden";
     document.documentElement.style.height = "100vh";
     document.body.style.overflow = "hidden";
     document.body.style.height = "100vh";
     
-    // 2. Hide the physical layout footer if it exists
     const globalFooter = document.getElementById("global-footer");
     if (globalFooter) {
       globalFooter.style.display = "none";
     }
 
-    // Cleanup on unmount (if they navigate away from home)
     return () => {
       document.documentElement.style.overflow = "";
       document.documentElement.style.height = "";
@@ -90,7 +108,6 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     let offsetX = 0;
     let offsetY = 0;
     
-    // Fill screen (object-fit: cover)
     if (canvasRatio > imgRatio) {
       drawHeight = canvas.width / imgRatio;
       offsetY = (canvas.height - drawHeight) / 2;
@@ -102,7 +119,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
   };
 
-  const drawFrame = (seq1Index: number, seq2Index: number, imgs1 = seq1Images, imgs2 = seq2Images) => {
+  const drawFrame = (indices: number[]) => {
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -110,25 +127,23 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw Sequence 1
-    const img1 = imgs1[Math.round(seq1Index)];
-    if (img1) drawSingleImage(img1, ctx, canvas);
-    
-    // Draw Sequence 2 over Sequence 1 if it has started
-    if (seq2Index >= 0) {
-      const img2 = imgs2[Math.round(seq2Index)];
-      if (img2) drawSingleImage(img2, ctx, canvas);
-    }
+    // Draw each active sequence layered on top of each other
+    indices.forEach((frameIdx, seqIdx) => {
+      if (frameIdx >= 0 && sequences[seqIdx] && sequences[seqIdx].length > 0) {
+        const img = sequences[seqIdx][Math.round(frameIdx)];
+        if (img) drawSingleImage(img, ctx, canvas);
+      }
+    });
   };
 
   // GSAP Observer Sequence (Zero Physical Scroll, Universal Parallax Folds)
   useEffect(() => {
-    if (seq1Images.length !== frameCount1 || seq2Images.length !== frameCount2 || !containerRef.current) return;
+    if (seq1Images.length !== frameCount1 || seq2Images.length !== frameCount2 || seq3Images.length !== frameCount3 || !containerRef.current) return;
 
     if (canvasRef.current) {
       canvasRef.current.width = window.innerWidth;
       canvasRef.current.height = window.innerHeight;
-      drawFrame(0, -1);
+      drawFrame([0]);
     }
 
     const ctx = gsap.context(() => {
@@ -146,30 +161,43 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       .to(".hero-subtitle", { opacity: 1, x: 0, duration: 1, ease: "power2.out" }, "-=0.5")
       .to(".hero-button", { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)" }, "-=0.5");
 
-      // ---- HERO CANVAS ANIMATION ----
-      const frameObj1 = { frame: 0 };
-      tl.to(frameObj1, {
-        frame: frameCount1 - 1,
+      // ---- CANVAS SEQUENCE 0 (Base layer) ----
+      const frameTracker = [0, -1, -1]; // Tracks the current frame of each sequence
+      
+      const frameObj0 = { frame: 0 };
+      tl.to(frameObj0, {
+        frame: frameCounts[0] - 1,
         duration: 3,
         snap: "frame",
         ease: "none",
-        onUpdate: () => drawFrame(frameObj1.frame, -1)
+        onUpdate: () => {
+           frameTracker[0] = frameObj0.frame;
+           drawFrame(frameTracker);
+        }
       });
 
       // ---- UNIVERSAL PARALLAX SLIDER ----
       // Loop over every subsequent fold and slide it up with a parallax effect
       for (let i = 1; i < foldCount; i++) {
         const transitionLabel = `transition-${i}`;
+        const duration = 3; // Standardize duration
         
-        // If it's the very first fold transition, we also want the second canvas sequence to play!
-        if (i === 1) {
-          const frameObj2 = { frame: 0 };
-          tl.to(frameObj2, {
-            frame: frameCount2 - 1,
-            duration: 3,
+        // If there is a canvas sequence corresponding to this fold transition, play it!
+        if (i < sequences.length) {
+          const seqObj = { frame: 0 };
+          tl.to(seqObj, {
+            frame: frameCounts[i] - 1,
+            duration: duration,
             snap: "frame",
             ease: "none",
-            onUpdate: () => drawFrame(frameCount1 - 1, frameObj2.frame) 
+            onUpdate: () => {
+              // Ensure previous sequences are pinned at their last frame
+              for(let j=0; j<i; j++) {
+                 frameTracker[j] = frameCounts[j] - 1;
+              }
+              frameTracker[i] = seqObj.frame;
+              drawFrame(frameTracker);
+            }
           }, transitionLabel);
         }
         
@@ -178,23 +206,26 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         tl.to(`.fold-${i - 1}`, { 
            yPercent: -50, 
            opacity: 0,  
-           duration: i === 1 ? 3 : 2, // Match canvas duration for first transition
+           duration: duration,
            ease: "power2.inOut" 
         }, transitionLabel)
         // Fold i moves up quickly from the bottom
         .to(`.fold-${i}`, { 
            yPercent: 0, 
            autoAlpha: 1, 
-           duration: i === 1 ? 3 : 2, 
+           duration: duration,
            ease: "power2.inOut" 
         }, transitionLabel);
         
-        // Specific internal animations for Wardrobe (Fold 1)
-        if (i === 1) {
-          // Play these right as the transition finishes
+        // Specific internal animations for known folds
+        if (i === 1) { // Wardrobe (Fold 2)
           tl.to(".wardrobe-title", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, `${transitionLabel}+=1.5`)
           .to(".wardrobe-subtitle", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, `${transitionLabel}+=1.5`)
           .to(".wardrobe-button", { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }, `${transitionLabel}+=1.5`);
+        } else if (i === 2) { // Nourish (Fold 3)
+          tl.to(".nourish-title", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, `${transitionLabel}+=1.5`)
+          .to(".nourish-subtitle", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, `${transitionLabel}+=1.5`)
+          .to(".nourish-button", { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }, `${transitionLabel}+=1.5`);
         }
         
         // Pause for user to read this fold before next scrub
@@ -209,7 +240,6 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         ease: "power2.inOut" 
       }, "footerIn");
 
-
       // --- OBSERVER: ZERO PHYSICAL SCROLL SCRUBBING ---
       let scrollProgress = 0;
       
@@ -218,11 +248,10 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         type: "wheel,touch,pointer",
         wheelSpeed: -1,
         tolerance: 10,
-        preventDefault: true, // Absolutely prevents any physical scrolling
+        preventDefault: true, 
         onChange: (self) => {
-          const speedMultiplier = 0.0003; 
+          const speedMultiplier = 0.00025; // Adjusted slightly for 3 folds
           scrollProgress += self.deltaY * speedMultiplier;
-          
           scrollProgress = Math.max(0, Math.min(1, scrollProgress));
           
           gsap.to(tl, {
@@ -240,11 +269,8 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       if (canvasRef.current) {
         canvasRef.current.width = window.innerWidth;
         canvasRef.current.height = window.innerHeight;
-        // Redraw current frame
-        drawFrame(
-           seq1Images.length === frameCount1 ? frameCount1 - 1 : 0, 
-           -1 // Simplified resize logic for now
-        );
+        // Basic redraw
+        drawFrame([frameCount1 - 1, -1, -1]);
       }
     };
     window.addEventListener("resize", handleResize);
@@ -253,7 +279,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       ctx.revert();
       window.removeEventListener("resize", handleResize);
     };
-  }, [seq1Images, seq2Images, folds.length]);
+  }, [seq1Images, seq2Images, seq3Images, folds.length]);
 
   return (
     <section ref={containerRef} style={{ height: "100vh", position: "relative", overflow: "hidden" }}>

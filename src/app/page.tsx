@@ -1,6 +1,7 @@
 import ScrollAnimator from "@/components/home/ScrollAnimator";
 import HeroOverlay from "@/components/home/HeroOverlay";
 import MiniWardrobeOverlay from "@/components/home/MiniWardrobeOverlay";
+import NourishOverlay from "@/components/home/NourishOverlay";
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
       <ScrollAnimator>
          <HeroOverlay />
          <MiniWardrobeOverlay />
+         <NourishOverlay />
       </ScrollAnimator>
     </main>
   );
