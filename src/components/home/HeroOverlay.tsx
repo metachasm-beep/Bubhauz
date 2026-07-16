@@ -16,7 +16,7 @@ export default function HeroOverlay() {
           <p className="hero-subtitle text-lg md:text-2xl text-[var(--foreground)] mb-10 font-semibold max-w-2xl glass-card p-6" style={{ opacity: 0, transform: 'translateX(-40px)' }}>
             Gentle, safe, and beautifully crafted essentials for your little one's everyday adventures.
           </p>
-          <button className="hero-button px-10 py-5 bg-[var(--primary)] text-white rounded-full text-xl font-bold hover:bg-[var(--primary-hover)] transition-all duration-300 shadow-glass-colored" style={{ opacity: 0, transform: 'scale(0.8)' }}>
+          <button className="hero-button liquid-button px-10 py-5 bg-[var(--primary)] text-white rounded-full text-xl font-bold hover:bg-[var(--primary-hover)] transition-all duration-300 shadow-glass-colored" style={{ opacity: 0, transform: 'scale(0.8)' }}>
             Explore Our Nursery Collection
           </button>
         </div>

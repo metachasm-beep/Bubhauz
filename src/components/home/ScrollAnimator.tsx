@@ -19,6 +19,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
   const [seq1Images, setSeq1Images] = useState<HTMLImageElement[]>([]);
   const [seq2Images, setSeq2Images] = useState<HTMLImageElement[]>([]);
   const [seq3Images, setSeq3Images] = useState<HTMLImageElement[]>([]);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   
   const frameCount1 = 102;
   const frameCount2 = 102;
@@ -37,7 +38,17 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     let loadedCount1 = 0;
     let loadedCount2 = 0;
     let loadedCount3 = 0;
+    let totalLoaded = 0;
+    const totalFrames = frameCount1 + frameCount2 + frameCount3;
     
+    const updateProgress = () => {
+      totalLoaded++;
+      // Throttle state updates to prevent re-render spam
+      if (totalLoaded % 5 === 0 || totalLoaded === totalFrames) {
+        setLoadingProgress(Math.floor((totalLoaded / totalFrames) * 100));
+      }
+    };
+
     // Load Sequence 1
     for (let i = 0; i < frameCount1; i++) {
       const img = new window.Image();
@@ -45,6 +56,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       img.src = `/heroscroll/${paddedIndex}.webp?v=1`;
       img.onload = () => {
         loadedCount1++;
+        updateProgress();
         if (i === 0) drawFrame([0]);
         if (loadedCount1 === frameCount1) setSeq1Images(loadedSeq1);
       };
@@ -58,6 +70,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       img.src = `/scroll2/use_the_clouds_whirlwind_image-ezremove_${paddedIndex}.webp?v=1`;
       img.onload = () => {
         loadedCount2++;
+        updateProgress();
         if (loadedCount2 === frameCount2) setSeq2Images(loadedSeq2);
       };
       loadedSeq2.push(img);
@@ -70,6 +83,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       img.src = `/scroll3/use_the_baby_apparel_image_as-ezremove_${paddedIndex}.webp?v=1`;
       img.onload = () => {
         loadedCount3++;
+        updateProgress();
         if (loadedCount3 === frameCount3) setSeq3Images(loadedSeq3);
       };
       loadedSeq3.push(img);
@@ -213,7 +227,12 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
            yPercent: 0, 
            autoAlpha: 1, 
            duration: 4, // Slow, elegant slide in
-           ease: "power2.inOut" 
+           ease: "power2.inOut",
+           onStart: () => {
+             if (typeof navigator !== 'undefined' && navigator.vibrate) {
+               navigator.vibrate(50);
+             }
+           }
         }, textLabel);
         
         // Animate the text elements for the current fold
@@ -309,6 +328,21 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
                {child}
              </div>
           ))}
+        </div>
+
+        {/* Elegant Preloader Overlay */}
+        <div 
+          className={`absolute inset-0 z-[100] bg-black flex flex-col items-center justify-center transition-opacity duration-1000 ${loadingProgress >= 100 ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'}`}
+        >
+          <div className="w-64 h-[1px] bg-white/20 rounded-full overflow-hidden mb-6 relative">
+             <div 
+               className="h-full bg-white transition-all duration-300 ease-out absolute left-0 top-0" 
+               style={{ width: `${loadingProgress}%`, boxShadow: '0 0 10px rgba(255,255,255,0.8)' }} 
+             />
+          </div>
+          <p className="text-white/60 text-sm tracking-[0.2em] uppercase font-light animate-pulse">
+            {loadingProgress < 100 ? `Preparing the nursery... ${loadingProgress}%` : "Ready"}
+          </p>
         </div>
       </div>
     </section>

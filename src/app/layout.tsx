@@ -3,6 +3,7 @@ import "./globals.css";
 import SiteDock from "@/components/ui/SiteDock";
 import SiteFooter from "@/components/ui/SiteFooter";
 import CookieConsent from "@/components/ui/CookieConsent";
+import MagneticCursor from "@/components/ui/MagneticCursor";
 
 export const metadata: Metadata = {
   title: "Bubhauz - Safe, Premium Baby Essentials",
@@ -21,6 +22,7 @@ export default function RootLayout({
         <SiteFooter />
         <SiteDock />
         <CookieConsent />
+        <MagneticCursor />
       </body>
     </html>
   );

@@ -9,7 +9,7 @@ export default function NourishOverlay() {
         <p className="nourish-subtitle text-xl md:text-3xl text-white max-w-3xl mx-auto drop-shadow-lg font-medium opacity-90 mb-10" style={{ opacity: 0, transform: 'translateY(60px)' }}>
           Everything your baby needs for a healthy, happy start.
         </p>
-        <button className="nourish-button px-10 py-5 bg-[var(--primary)] text-white rounded-full text-xl font-bold hover:bg-[var(--primary-hover)] transition-all duration-300 shadow-glass-colored" style={{ opacity: 0, transform: 'scale(0.8)' }}>
+        <button className="nourish-button liquid-button px-10 py-5 bg-[var(--primary)] text-white rounded-full text-xl font-bold hover:bg-[var(--primary-hover)] transition-all duration-300 shadow-glass-colored" style={{ opacity: 0, transform: 'scale(0.8)' }}>
           Shop Feeding Essentials
         </button>
       </div>

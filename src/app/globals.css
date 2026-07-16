@@ -61,7 +61,38 @@ body {
   will-change: transform;
 }
 
+/* Liquid button hover effect */
+.liquid-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.liquid-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+  transform: skewX(-25deg);
+  transition: all 0.5s ease;
+  z-index: 1;
+}
+
+.liquid-button:hover::after {
+  left: 150%;
+}
+
+.liquid-button:hover {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
 /* Hide native scrollbar for app-like feel */
+.hide-scrollbar {
+  display: none;
+}
 ::-webkit-scrollbar {
   display: none;
 }
