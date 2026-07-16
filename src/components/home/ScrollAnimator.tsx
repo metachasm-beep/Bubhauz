@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, ReactNode } from "react";
+import React, { useEffect, useRef, useState, ReactNode, Children } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { Observer } from "gsap/Observer";
@@ -19,6 +19,8 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
   const [seq2Images, setSeq2Images] = useState<HTMLImageElement[]>([]);
   const frameCount1 = 102; // 000.webp to 101.webp
   const frameCount2 = 102; // 000.webp to 101.webp
+  
+  const folds = Children.toArray(children);
 
   // Load images
   useEffect(() => {
@@ -119,7 +121,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     }
   };
 
-  // GSAP Observer Sequence (Zero Physical Scroll)
+  // GSAP Observer Sequence (Zero Physical Scroll, Universal Parallax Folds)
   useEffect(() => {
     if (seq1Images.length !== frameCount1 || seq2Images.length !== frameCount2 || !containerRef.current) return;
 
@@ -131,12 +133,20 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ paused: true });
+      const foldCount = folds.length;
 
-      // ---- FOLD 1: HERO ----
+      // INITIAL STATE SETUP
+      if (foldCount > 0) {
+        gsap.set(".fold-wrapper", { yPercent: (i) => i === 0 ? 0 : 100 });
+        gsap.set(".fold-wrapper", { autoAlpha: (i) => i === 0 ? 1 : 0 }); 
+      }
+
+      // ---- HERO INTERNAL ANIMATIONS (Happens instantly on load / scroll 0) ----
       tl.to(".hero-title-word", { opacity: 1, y: 0, filter: "blur(0px)", stagger: 0.2, duration: 1, ease: "power2.out" })
       .to(".hero-subtitle", { opacity: 1, x: 0, duration: 1, ease: "power2.out" }, "-=0.5")
       .to(".hero-button", { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)" }, "-=0.5");
 
+      // ---- HERO CANVAS ANIMATION ----
       const frameObj1 = { frame: 0 };
       tl.to(frameObj1, {
         frame: frameCount1 - 1,
@@ -146,27 +156,52 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         onUpdate: () => drawFrame(frameObj1.frame, -1)
       });
 
-      // ---- FOLD 2: TRANSITION & MINI WARDROBE ----
-      // Instead of an empty set/gap, we start fading text instantly while the second sequence begins drawing over the first.
-      tl.to(".hero-overlay-container", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, "transition")
-      .to(".wardrobe-overlay-container", { opacity: 1, duration: 0.1 }, "transition")
-      .to(".wardrobe-title", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, "transition")
-      .to(".wardrobe-subtitle", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, "transition")
-      .to(".wardrobe-button", { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }, "transition");
+      // ---- UNIVERSAL PARALLAX SLIDER ----
+      // Loop over every subsequent fold and slide it up with a parallax effect
+      for (let i = 1; i < foldCount; i++) {
+        const transitionLabel = `transition-${i}`;
+        
+        // If it's the very first fold transition, we also want the second canvas sequence to play!
+        if (i === 1) {
+          const frameObj2 = { frame: 0 };
+          tl.to(frameObj2, {
+            frame: frameCount2 - 1,
+            duration: 3,
+            snap: "frame",
+            ease: "none",
+            onUpdate: () => drawFrame(frameCount1 - 1, frameObj2.frame) 
+          }, transitionLabel);
+        }
+        
+        // Parallax Transition between Fold[i-1] and Fold[i]
+        // Fold i-1 moves up slowly (depth effect) and fades out slightly
+        tl.to(`.fold-${i - 1}`, { 
+           yPercent: -50, 
+           opacity: 0,  
+           duration: i === 1 ? 3 : 2, // Match canvas duration for first transition
+           ease: "power2.inOut" 
+        }, transitionLabel)
+        // Fold i moves up quickly from the bottom
+        .to(`.fold-${i}`, { 
+           yPercent: 0, 
+           autoAlpha: 1, 
+           duration: i === 1 ? 3 : 2, 
+           ease: "power2.inOut" 
+        }, transitionLabel);
+        
+        // Specific internal animations for Wardrobe (Fold 1)
+        if (i === 1) {
+          // Play these right as the transition finishes
+          tl.to(".wardrobe-title", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, `${transitionLabel}+=1.5`)
+          .to(".wardrobe-subtitle", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, `${transitionLabel}+=1.5`)
+          .to(".wardrobe-button", { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }, `${transitionLabel}+=1.5`);
+        }
+        
+        // Pause for user to read this fold before next scrub
+        tl.to({}, { duration: 1.5 });
+      }
 
-      const frameObj2 = { frame: 0 };
-      tl.to(frameObj2, {
-        frame: frameCount2 - 1,
-        duration: 3,
-        snap: "frame",
-        ease: "none",
-        onUpdate: () => drawFrame(frameCount1 - 1, frameObj2.frame) // KEEP seq1 on the LAST frame!
-      }, "transition");
-
-      // Phase 5: Hold for interaction (Fold 2)
-      tl.to({}, { duration: 1 });
-
-      // Phase 6: Transition in Footer Overlay (No physical scroll)
+      // ---- TRANSITION IN FOOTER OVERLAY ----
       tl.to(".footer-overlay-container", { 
         opacity: 1, 
         pointerEvents: "auto",
@@ -183,16 +218,13 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         type: "wheel,touch,pointer",
         wheelSpeed: -1,
         tolerance: 10,
-        preventDefault: true, // Absolutely prevents any physical scrolling (elastic bounce, etc)
+        preventDefault: true, // Absolutely prevents any physical scrolling
         onChange: (self) => {
-          // Convert the pixel delta into a tiny progress increment
           const speedMultiplier = 0.0003; 
           scrollProgress += self.deltaY * speedMultiplier;
           
-          // Clamp progress strictly between 0 (start) and 1 (end)
           scrollProgress = Math.max(0, Math.min(1, scrollProgress));
           
-          // Tween the timeline's progress smoothly
           gsap.to(tl, {
             progress: scrollProgress,
             duration: 0.5,
@@ -208,6 +240,11 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       if (canvasRef.current) {
         canvasRef.current.width = window.innerWidth;
         canvasRef.current.height = window.innerHeight;
+        // Redraw current frame
+        drawFrame(
+           seq1Images.length === frameCount1 ? frameCount1 - 1 : 0, 
+           -1 // Simplified resize logic for now
+        );
       }
     };
     window.addEventListener("resize", handleResize);
@@ -216,7 +253,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       ctx.revert();
       window.removeEventListener("resize", handleResize);
     };
-  }, [seq1Images, seq2Images]);
+  }, [seq1Images, seq2Images, folds.length]);
 
   return (
     <section ref={containerRef} style={{ height: "100vh", position: "relative", overflow: "hidden" }}>
@@ -236,8 +273,17 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         {/* Subtle overlay to ensure text is readable over the canvas */}
         <div className="absolute inset-0 bg-black/20 z-10 pointer-events-none" />
 
-        {/* Render overlays inside the pinned container */}
-        {children}
+        {/* UNIVERSAL FOLDS CONTAINER */}
+        <div className="universal-folds-container absolute inset-0 z-20 pointer-events-none">
+          {folds.map((child, index) => (
+             <div 
+               key={index} 
+               className={`fold-wrapper fold-${index} absolute inset-0 w-full h-full pointer-events-auto`}
+             >
+               {child}
+             </div>
+          ))}
+        </div>
 
         {/* Footer Overlay */}
         <div className="footer-overlay-container absolute bottom-0 left-0 w-full z-40 pointer-events-none" style={{ opacity: 0 }}>

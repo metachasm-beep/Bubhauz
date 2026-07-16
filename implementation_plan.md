@@ -1,13 +1,14 @@
 # Goal Description
-The user is still experiencing a "vertical scroll" and a "black gap".
-1. **Vertical Scroll Prevention**: To completely and totally guarantee zero physical scroll, I will apply `position: fixed` and `inset: 0` directly to the `<main>` container on the homepage. This physically detaches the app from the document flow, making vertical scrolling impossible regardless of device or browser quirks.
-2. **Black Gap Fix**: The images in Sequence 2 might have transparent backgrounds. When the canvas clears to draw Sequence 2, it reveals the black background container. I will modify the canvas drawing logic so that the last frame of Sequence 1 remains painted as a background layer, and Sequence 2 animates directly on top of it.
-
-## User Review Required
-> [!IMPORTANT]
-> - I am permanently locking the homepage to the screen using `position: fixed`. This is the strongest possible lock in web development. If you still see vertical movement after this, it is an optical illusion from the images themselves (the camera panning down in the images) or the text fading up.
-> - I am keeping the last frame of the Hero animation on-screen when the Wardrobe animation starts, so the clouds will animate directly over the nursery instead of a black background.
+You requested a "universal" parallax transition between folds. Since our homepage is a strict zero-scroll app powered by GSAP Observer, I will refactor the `ScrollAnimator` to automatically generate a parallax slide effect for *any* number of folds passed into it, making the logic truly universal.
 
 ## Proposed Changes
-1. **`page.tsx`**: Change `<main>` to be `fixed inset-0 w-full h-[100dvh] overflow-hidden`.
-2. **`ScrollAnimator.tsx`**: Rewrite the `drawFrame` logic to accept two indices. It will always draw Sequence 1 (either the current frame, or the final frame if we've moved to phase 2), and then draw Sequence 2 on top if applicable. This eliminates the "black gap".
+1. **Universal Parallax Engine**: I will rewrite the GSAP timeline in `ScrollAnimator.tsx` to dynamically loop through its `children`.
+2. **The Parallax Effect**: For every transition between Fold A and Fold B:
+   - Fold A will slide up slightly (e.g., `yPercent: -40`) to create a slower, background depth effect.
+   - Fold B will start off-screen at the bottom (`yPercent: 100`) and slide up to `yPercent: 0` (faster foreground effect), overlapping Fold A.
+3. **Dynamic Folds**: This means you can add `<FeatureOverlay>`, `<StoryOverlay>`, etc. to `page.tsx` in the future, and the `ScrollAnimator` will automatically give them the exact same parallax transition without needing any new GSAP code!
+4. **Canvas Backgrounds**: The canvas animations will still run underneath these parallax sliding overlays.
+
+## Open Questions
+> [!IMPORTANT]
+> The current canvas animation draws sequence 1 (nursery) and then sequence 2 (clouds) overlapping. If we have more than 2 folds in the future, how do you want the canvas backgrounds handled? For now, I will keep the canvas tied to the first transition, but make the *UI overlays* universally parallax. Does this sound correct?
