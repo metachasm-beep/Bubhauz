@@ -39,7 +39,7 @@ export default function NightShiftFold() {
       }, 0);
 
       // Fade and slide up the textual content
-      tl.from(contentRef.current.children, {
+      tl.from(contentRef.current!.children, {
         y: 50,
         opacity: 0,
         stagger: 0.2,
