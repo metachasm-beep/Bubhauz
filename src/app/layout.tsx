@@ -4,6 +4,7 @@ import SiteDock from "@/components/ui/SiteDock";
 import SiteFooter from "@/components/ui/SiteFooter";
 import CookieConsent from "@/components/ui/CookieConsent";
 import MagneticCursor from "@/components/ui/MagneticCursor";
+import SmoothScrolling from "@/components/ui/SmoothScrolling";
 
 export const metadata: Metadata = {
   title: "Bubhauz - Safe, Premium Baby Essentials",
@@ -18,11 +19,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
-        {children}
-        <SiteFooter />
-        <SiteDock />
-        <CookieConsent />
-        <MagneticCursor />
+        <SmoothScrolling>
+          {children}
+          <SiteFooter />
+          <SiteDock />
+          <CookieConsent />
+          <MagneticCursor />
+        </SmoothScrolling>
       </body>
     </html>
   );
