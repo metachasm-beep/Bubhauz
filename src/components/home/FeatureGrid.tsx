@@ -8,6 +8,7 @@ import CircularGallery from '../react-bits/CircularGallery';
 import SearchFirstHub from './SearchFirstHub';
 import ProductLens from './ProductLens';
 import NightShiftFold from './NightShiftFold';
+import PurityWaterfall from './PurityWaterfall';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -39,6 +40,11 @@ export default function FeatureGrid() {
 
       <div className="w-full relative z-10 px-4 mb-10">
         <SearchFirstHub />
+      </div>
+      
+      {/* Purity Waterfall Parallax */}
+      <div className="w-full relative z-10 px-4 mb-10">
+        <PurityWaterfall />
       </div>
       
       {/* Microscopic Product Lens */}
