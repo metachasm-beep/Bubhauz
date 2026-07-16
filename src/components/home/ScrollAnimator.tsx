@@ -14,29 +14,41 @@ interface ScrollAnimatorProps {
 export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLElement>(null);
-  const [images, setImages] = useState<HTMLImageElement[]>([]);
-  const frameCount = 102; // 000.webp to 101.webp
+  const [seq1Images, setSeq1Images] = useState<HTMLImageElement[]>([]);
+  const [seq2Images, setSeq2Images] = useState<HTMLImageElement[]>([]);
+  const frameCount1 = 102; // 000.webp to 101.webp
+  const frameCount2 = 102; // 000.webp to 101.webp
 
   // Load images
   useEffect(() => {
-    const loadedImages: HTMLImageElement[] = [];
-    let loadedCount = 0;
+    const loadedSeq1: HTMLImageElement[] = [];
+    const loadedSeq2: HTMLImageElement[] = [];
+    let loadedCount1 = 0;
+    let loadedCount2 = 0;
     
-    for (let i = 0; i < frameCount; i++) {
+    // Load Sequence 1
+    for (let i = 0; i < frameCount1; i++) {
       const img = new window.Image();
       const paddedIndex = i.toString().padStart(3, "0");
       img.src = `/heroscroll/${paddedIndex}.webp`;
-      
       img.onload = () => {
-        loadedCount++;
-        if (i === 0) {
-          drawFrame(0, loadedImages);
-        }
-        if (loadedCount === frameCount) {
-          setImages(loadedImages);
-        }
+        loadedCount1++;
+        if (i === 0) drawFrame(0, loadedSeq1);
+        if (loadedCount1 === frameCount1) setSeq1Images(loadedSeq1);
       };
-      loadedImages.push(img);
+      loadedSeq1.push(img);
+    }
+
+    // Load Sequence 2
+    for (let i = 0; i < frameCount2; i++) {
+      const img = new window.Image();
+      const paddedIndex = i.toString().padStart(3, "0");
+      img.src = `/scroll2/use_the_clouds_whirlwind_image-ezremove_${paddedIndex}.webp`;
+      img.onload = () => {
+        loadedCount2++;
+        if (loadedCount2 === frameCount2) setSeq2Images(loadedSeq2);
+      };
+      loadedSeq2.push(img);
     }
   }, []);
 
@@ -55,6 +67,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     let offsetX = 0;
     let offsetY = 0;
     
+    // Fill screen (object-fit: cover)
     if (canvasRatio > imgRatio) {
       drawHeight = canvas.width / imgRatio;
       offsetY = (canvas.height - drawHeight) / 2;
@@ -69,72 +82,85 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
 
   // GSAP ScrollTrigger Sequence
   useEffect(() => {
-    if (images.length !== frameCount || !containerRef.current) return;
+    if (seq1Images.length !== frameCount1 || seq2Images.length !== frameCount2 || !containerRef.current) return;
 
-    // Ensure canvas size is set
     if (canvasRef.current) {
       canvasRef.current.width = window.innerWidth;
       canvasRef.current.height = window.innerHeight;
-      drawFrame(0, images);
+      drawFrame(0, seq1Images);
     }
 
     const ctx = gsap.context(() => {
-      // Create master timeline pinned to the container
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top top",
-          end: "+=400%", // 4 full scrolls
-          scrub: 1, // Smooth scrub
+          end: "+=1200%", // 12 full scrolls for both sequences + holds
+          scrub: 1, 
           pin: true,
         }
       });
 
-      // Phase 1: Text Reveal (Scroll 1)
+      // ---- FOLD 1: HERO ----
+      // Phase 1: Text Reveal
       tl.to(".hero-title-word", { 
-        opacity: 1, 
-        y: 0, 
-        filter: "blur(0px)", 
-        stagger: 0.2, 
-        duration: 1,
-        ease: "power2.out"
+        opacity: 1, y: 0, filter: "blur(0px)", stagger: 0.2, duration: 1, ease: "power2.out" 
       })
       .to(".hero-subtitle", { 
-        opacity: 1, 
-        x: 0, 
-        duration: 1,
-        ease: "power2.out"
+        opacity: 1, x: 0, duration: 1, ease: "power2.out" 
       }, "-=0.5")
       .to(".hero-button", { 
-        opacity: 1, 
-        scale: 1, 
-        duration: 1,
-        ease: "back.out(1.7)"
+        opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)" 
       }, "-=0.5");
 
-      // Phase 2 & 3: Canvas Image Sequence (Scrolls 2 & 3)
-      const frameObj = { frame: 0 };
-      tl.to(frameObj, {
-        frame: frameCount - 1,
-        duration: 2, // Take up 2 "scrolls" of duration
+      // Phase 2: Canvas Image Sequence 1
+      const frameObj1 = { frame: 0 };
+      tl.to(frameObj1, {
+        frame: frameCount1 - 1,
+        duration: 2.5,
         snap: "frame",
         ease: "none",
-        onUpdate: () => drawFrame(frameObj.frame, images)
+        onUpdate: () => drawFrame(frameObj1.frame, seq1Images)
       });
 
-      // Phase 4: Tunnel Parallax Transition (Scroll 4)
-      tl.to(canvasRef.current, { 
-        scale: 10, 
-        opacity: 0, 
-        duration: 1, 
-        ease: "power3.in" 
-      }, "+=0.1")
-      .to(".hero-overlay-container", {
-        scale: 5,
-        opacity: 0,
-        duration: 1,
-        ease: "power3.in"
-      }, "<");
+      // Phase 3: Hold for interaction (Fold 1)
+      tl.to({}, { duration: 1 });
+
+      // Phase 4: Transition out Hero
+      tl.to(canvasRef.current, { scale: 5, opacity: 0, duration: 1, ease: "power3.in" }, "transitionOut")
+      .to(".hero-overlay-container", { scale: 2, opacity: 0, duration: 1, ease: "power3.in" }, "transitionOut");
+
+      // ---- FOLD 2: MINI WARDROBE ----
+      // Reset canvas scale for Sequence 2 and ensure it draws the first frame of Sequence 2 before fading in
+      tl.set(canvasRef.current, { 
+        scale: 1, 
+        onComplete: () => drawFrame(0, seq2Images),
+        onReverseComplete: () => drawFrame(frameCount1 - 1, seq1Images)
+      });
+
+      // Phase 5: Fade in Sequence 2 Canvas and Wardrobe Text
+      tl.to(canvasRef.current, { opacity: 1, duration: 1 }, "transitionIn")
+      .to(".wardrobe-overlay-container", { opacity: 1, duration: 0.1 }, "transitionIn")
+      .to(".wardrobe-title", { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, "transitionIn")
+      .to(".wardrobe-subtitle", { opacity: 1, y: 0, duration: 1, ease: "power2.out" }, "-=0.5")
+      .to(".wardrobe-button", { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)" }, "-=0.5");
+
+      // Phase 6: Canvas Image Sequence 2
+      const frameObj2 = { frame: 0 };
+      tl.to(frameObj2, {
+        frame: frameCount2 - 1,
+        duration: 2.5,
+        snap: "frame",
+        ease: "none",
+        onUpdate: () => drawFrame(frameObj2.frame, seq2Images)
+      });
+
+      // Phase 7: Hold for interaction (Fold 2)
+      tl.to({}, { duration: 1 });
+
+      // Phase 8: Transition out Wardrobe Fold
+      tl.to(canvasRef.current, { scale: 1.5, opacity: 0, duration: 1, ease: "power3.in" }, "transitionOut2")
+      .to(".wardrobe-overlay-container", { scale: 1.5, opacity: 0, duration: 1, ease: "power3.in" }, "transitionOut2");
 
     }, containerRef);
 
@@ -142,8 +168,6 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       if (canvasRef.current) {
         canvasRef.current.width = window.innerWidth;
         canvasRef.current.height = window.innerHeight;
-        // Re-draw current frame (approximate by reading timeline progress if possible, 
-        // but simple redraw of frame 0 is a fallback)
       }
     };
     window.addEventListener("resize", handleResize);
@@ -152,13 +176,14 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       ctx.revert();
       window.removeEventListener("resize", handleResize);
     };
-  }, [images]);
+  }, [seq1Images, seq2Images]);
 
   return (
     <section ref={containerRef} style={{ height: "100vh", position: "relative" }}>
       <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100vh", overflow: "hidden", backgroundColor: "#000" }}>
+        
         {/* Fallback Image */}
-        <div className={`absolute inset-0 z-0 transition-opacity duration-700 ${images.length === frameCount ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`absolute inset-0 z-0 transition-opacity duration-700 ${seq1Images.length === frameCount1 ? 'opacity-0' : 'opacity-100'}`}>
             <Image src="/heroscroll/000.webp" alt="Hero Background" fill className="object-cover" priority />
         </div>
         
@@ -168,7 +193,10 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
           style={{ width: "100%", height: "100%", display: "block", transformOrigin: "center center" }}
         />
         
-        {/* Render children inside the pinned container */}
+        {/* Subtle overlay to ensure text is readable over the canvas */}
+        <div className="absolute inset-0 bg-black/20 z-10 pointer-events-none" />
+
+        {/* Render overlays inside the pinned container */}
         {children}
       </div>
     </section>
