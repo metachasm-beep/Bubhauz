@@ -34,7 +34,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       img.src = `/heroscroll/${paddedIndex}.webp`;
       img.onload = () => {
         loadedCount1++;
-        if (i === 0) drawFrame(0, loadedSeq1);
+        if (i === 0) drawFrame(0, -1, loadedSeq1, []);
         if (loadedCount1 === frameCount1) setSeq1Images(loadedSeq1);
       };
       loadedSeq1.push(img);
@@ -79,13 +79,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     };
   }, []);
 
-  const drawFrame = (index: number, imgArray: HTMLImageElement[]) => {
-    if (!canvasRef.current || !imgArray[index]) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    
-    const img = imgArray[index];
+  const drawSingleImage = (img: HTMLImageElement, ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
     const canvasRatio = canvas.width / canvas.height;
     const imgRatio = img.width / img.height;
     
@@ -102,9 +96,27 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       drawWidth = canvas.height * imgRatio;
       offsetX = (canvas.width - drawWidth) / 2;
     }
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
     ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+  };
+
+  const drawFrame = (seq1Index: number, seq2Index: number, imgs1 = seq1Images, imgs2 = seq2Images) => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw Sequence 1
+    const img1 = imgs1[Math.round(seq1Index)];
+    if (img1) drawSingleImage(img1, ctx, canvas);
+    
+    // Draw Sequence 2 over Sequence 1 if it has started
+    if (seq2Index >= 0) {
+      const img2 = imgs2[Math.round(seq2Index)];
+      if (img2) drawSingleImage(img2, ctx, canvas);
+    }
   };
 
   // GSAP Observer Sequence (Zero Physical Scroll)
@@ -114,50 +126,42 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     if (canvasRef.current) {
       canvasRef.current.width = window.innerWidth;
       canvasRef.current.height = window.innerHeight;
-      drawFrame(0, seq1Images);
+      drawFrame(0, -1);
     }
 
     const ctx = gsap.context(() => {
-      // Create a paused timeline that we will manually scrub using Observer
       const tl = gsap.timeline({ paused: true });
 
       // ---- FOLD 1: HERO ----
-      // Phase 1: Text Reveal
       tl.to(".hero-title-word", { opacity: 1, y: 0, filter: "blur(0px)", stagger: 0.2, duration: 1, ease: "power2.out" })
       .to(".hero-subtitle", { opacity: 1, x: 0, duration: 1, ease: "power2.out" }, "-=0.5")
       .to(".hero-button", { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)" }, "-=0.5");
 
-      // Phase 2: Canvas Image Sequence 1
       const frameObj1 = { frame: 0 };
       tl.to(frameObj1, {
         frame: frameCount1 - 1,
         duration: 3,
         snap: "frame",
         ease: "none",
-        onUpdate: () => drawFrame(frameObj1.frame, seq1Images)
+        onUpdate: () => drawFrame(frameObj1.frame, -1)
       });
 
-      // Phase 3: Transition out Hero & Switch to Seq 2 & Fade in Wardrobe text
-      // Instant transition: Hero text fades out, Wardrobe text fades in, canvas swaps
+      // ---- FOLD 2: TRANSITION & MINI WARDROBE ----
+      // Instead of an empty set/gap, we start fading text instantly while the second sequence begins drawing over the first.
       tl.to(".hero-overlay-container", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, "transition")
-      .set(canvasRef.current, { 
-        onComplete: () => drawFrame(0, seq2Images),
-        onReverseComplete: () => drawFrame(frameCount1 - 1, seq1Images)
-      }, "transition")
       .to(".wardrobe-overlay-container", { opacity: 1, duration: 0.1 }, "transition")
       .to(".wardrobe-title", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, "transition")
       .to(".wardrobe-subtitle", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, "transition")
       .to(".wardrobe-button", { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }, "transition");
 
-      // Phase 4: Canvas Image Sequence 2
       const frameObj2 = { frame: 0 };
       tl.to(frameObj2, {
         frame: frameCount2 - 1,
         duration: 3,
         snap: "frame",
         ease: "none",
-        onUpdate: () => drawFrame(frameObj2.frame, seq2Images)
-      });
+        onUpdate: () => drawFrame(frameCount1 - 1, frameObj2.frame) // KEEP seq1 on the LAST frame!
+      }, "transition");
 
       // Phase 5: Hold for interaction (Fold 2)
       tl.to({}, { duration: 1 });
@@ -181,7 +185,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         tolerance: 10,
         preventDefault: true, // Absolutely prevents any physical scrolling (elastic bounce, etc)
         onChange: (self) => {
-          // Convert the pixel delta into a tiny progress increment (tune 0.0005 for speed)
+          // Convert the pixel delta into a tiny progress increment
           const speedMultiplier = 0.0003; 
           scrollProgress += self.deltaY * speedMultiplier;
           

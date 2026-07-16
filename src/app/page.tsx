@@ -4,7 +4,7 @@ import MiniWardrobeOverlay from "@/components/home/MiniWardrobeOverlay";
 
 export default function Home() {
   return (
-    <main className="home-page-no-footer min-h-screen bg-black">
+    <main className="home-page-no-footer fixed inset-0 w-full h-[100dvh] bg-black overflow-hidden pointer-events-auto">
       <ScrollAnimator>
          <HeroOverlay />
          <MiniWardrobeOverlay />
