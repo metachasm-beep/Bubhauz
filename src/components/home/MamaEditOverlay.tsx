@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 export default function MamaEditOverlay() {
   return (
     <div className="absolute inset-0 w-full h-[100dvh] flex flex-col justify-end md:justify-center items-start text-left pl-6 pr-6 md:pl-[10vw] md:pr-[50vw] pb-[15vh] md:pb-0 pointer-events-none z-30">
