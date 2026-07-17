@@ -103,20 +103,40 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     const canvasRatio = canvas.width / canvas.height;
     const imgRatio = img.width / img.height;
     
-    let drawWidth = canvas.width;
-    let drawHeight = canvas.height;
-    let offsetX = 0;
-    let offsetY = 0;
-    
-    if (canvasRatio > imgRatio) {
-      drawHeight = canvas.width / imgRatio;
-      offsetY = (canvas.height - drawHeight) / 2;
+    // Mobile optimization: Use blur-fill to prevent massive cropping on portrait screens
+    if (canvasRatio < 0.8 && imgRatio > 1) { 
+      // 1. Draw blurred cover background
+      let bgWidth = canvas.height * imgRatio;
+      let bgHeight = canvas.height;
+      let bgOffsetX = (canvas.width - bgWidth) / 2;
+      
+      ctx.filter = 'blur(30px) brightness(0.3)';
+      ctx.drawImage(img, bgOffsetX, 0, bgWidth, bgHeight);
+      
+      // 2. Draw contained sharp image in center
+      ctx.filter = 'none';
+      let fgWidth = canvas.width;
+      let fgHeight = canvas.width / imgRatio;
+      let fgOffsetY = (canvas.height - fgHeight) / 2;
+      ctx.drawImage(img, 0, fgOffsetY, fgWidth, fgHeight);
     } else {
-      drawWidth = canvas.height * imgRatio;
-      offsetX = (canvas.width - drawWidth) / 2;
+      // Standard cover behavior for desktop
+      let drawWidth = canvas.width;
+      let drawHeight = canvas.height;
+      let offsetX = 0;
+      let offsetY = 0;
+      
+      if (canvasRatio > imgRatio) {
+        drawHeight = canvas.width / imgRatio;
+        offsetY = (canvas.height - drawHeight) / 2;
+      } else {
+        drawWidth = canvas.height * imgRatio;
+        offsetX = (canvas.width - drawWidth) / 2;
+      }
+      
+      ctx.filter = 'none';
+      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
     }
-    
-    ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
   };
 
   const drawFrame = (indices: number[]) => {

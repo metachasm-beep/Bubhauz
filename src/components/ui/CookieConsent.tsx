@@ -23,20 +23,18 @@ export default function CookieConsent() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-white border-t-4 border-[var(--primary)] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-50 p-6 flex flex-col md:flex-row items-center justify-between gap-4 animate-slide-up">
-      <div className="text-[var(--foreground)] text-sm md:text-base max-w-4xl">
+    <div className="fixed bottom-32 left-4 right-4 md:bottom-6 md:left-6 md:right-auto md:w-[350px] bg-white/80 backdrop-blur-md border border-white/40 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.15)] z-[110] p-5 flex flex-col gap-4 animate-slide-up">
+      <div className="text-[var(--foreground)] text-xs md:text-sm">
         <p>
-          <strong>We use cookies to ensure you get the best experience on our website.</strong> By continuing to use our site, you agree to our use of cookies and our updated <Link href="/legal/privacy" className="text-[var(--primary)] font-semibold underline hover:text-[var(--primary-hover)]">Privacy Policy</Link> as per the Information Technology (IT) Rules, 2011.
+          We use cookies to improve your experience. By continuing, you agree to our <Link href="/legal/privacy" className="text-[var(--primary)] font-semibold underline">Privacy Policy</Link>.
         </p>
       </div>
-      <div className="flex shrink-0">
-        <button 
-          onClick={acceptCookies}
-          className="px-8 py-3 bg-[var(--primary)] text-white font-bold rounded-full hover:bg-[var(--primary-hover)] transition-colors shadow-lg"
-        >
-          I Accept
-        </button>
-      </div>
+      <button 
+        onClick={acceptCookies}
+        className="w-full py-2.5 bg-[var(--primary)] text-white font-bold rounded-xl hover:bg-[var(--primary-hover)] transition-colors shadow-md text-sm cursor-pointer"
+      >
+        Got it!
+      </button>
     </div>
   );
 }
