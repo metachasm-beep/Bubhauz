@@ -232,13 +232,13 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
            }
         }, textInLabel);
         
-        // Animate the text elements IN (Supports both Hero and Standard folds)
+        // Animate the text elements IN (Kinetic Blur - Option A)
         tl.to(`.fold-${i} .animate-up`, { 
           opacity: 1, 
-          y: 0, 
+          filter: "blur(0px)",
           stagger: 0.15, 
           duration: 1.2, 
-          ease: "power3.out" 
+          ease: "power2.out" 
         }, `${textInLabel}+=0.2`);
         
         tl.to({}, { duration: 3 }); // Pause for user to read
@@ -247,7 +247,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         tl.add(textOutLabel);
         tl.to(`.fold-${i} .animate-up`, {
           opacity: 0,
-          y: -24,
+          filter: "blur(10px)",
           duration: 1.2,
           ease: "power2.inOut"
         }, textOutLabel);
