@@ -33,15 +33,15 @@ export default function ProductDetailView({ id }: ProductDetailViewProps) {
     <main className="min-h-[100dvh] bg-[#F9F6F0] text-[#111] selection:bg-[#C67D53] selection:text-[#F9F6F0]">
       
       {/* Sticky Header */}
-      <header className="fixed top-0 left-0 w-full z-50 px-6 py-4 flex items-center justify-between mix-blend-difference text-[#F9F6F0]">
+      <header className="sticky top-0 z-50 w-full bg-[#F9F6F0]/80 backdrop-blur-xl border-b border-black/5 px-6 py-4 flex items-center justify-between">
         <Link 
           href={`/category/${category}`}
-          className="inline-flex items-center gap-2 text-sm uppercase tracking-widest font-medium hover:text-[#C67D53] transition-colors"
+          className="inline-flex items-center gap-2 text-sm uppercase tracking-widest font-medium text-[#111]/70 hover:text-[#C67D53] transition-colors"
         >
           <ArrowLeft size={16} />
           Back to {category}
         </Link>
-        <span className="text-xs uppercase tracking-[0.3em] font-light opacity-50 hidden md:block">
+        <span className="text-xs uppercase tracking-[0.3em] font-light opacity-50 hidden md:block text-[#111]">
           Bubhauz // {category}
         </span>
       </header>
