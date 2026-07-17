@@ -3,7 +3,6 @@ import "./globals.css";
 import SiteDock from "@/components/ui/SiteDock";
 import SiteFooter from "@/components/ui/SiteFooter";
 import CookieConsent from "@/components/ui/CookieConsent";
-import MagneticCursor from "@/components/ui/MagneticCursor";
 import SmoothScrolling from "@/components/ui/SmoothScrolling";
 
 export const metadata: Metadata = {
@@ -24,7 +23,6 @@ export default function RootLayout({
           <SiteFooter />
           <SiteDock />
           <CookieConsent />
-          <MagneticCursor />
         </SmoothScrolling>
       </body>
     </html>

@@ -174,14 +174,19 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       frameTracker[0] = 0;
       
       tl.add("canvas-anim-0");
-      const frameObj0 = { frame: 0 };
+      const frameObj0 = { frame: -1 };
       tl.to(frameObj0, {
         frame: frameCounts[0] - 1,
         duration: 8, // Stretched out for smoother scrolling
-        snap: "frame",
         ease: "none",
         onUpdate: () => {
-           frameTracker[0] = frameObj0.frame;
+           frameTracker[0] = Math.max(0, Math.round(frameObj0.frame));
+           
+           // Ensure all future sequences are completely hidden when scrubbing back to hero
+           for(let j=1; j<foldCount; j++) {
+              frameTracker[j] = -1;
+           }
+           
            drawFrame(frameTracker);
         }
       }, "canvas-anim-0");
@@ -233,18 +238,21 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         
         // If there is a canvas sequence corresponding to this fold transition, play it!
         if (i < sequencesRef.current.length) {
-          const seqObj = { frame: 0 };
+          const seqObj = { frame: -1 };
           tl.to(seqObj, {
             frame: frameCounts[i] - 1,
             duration: duration,
-            snap: "frame",
             ease: "none",
             onUpdate: () => {
               // Ensure previous sequences are pinned at their last frame
               for(let j=0; j<i; j++) {
                  frameTracker[j] = frameCounts[j] - 1;
               }
-              frameTracker[i] = seqObj.frame;
+              // Ensure future sequences are completely hidden (critical for backward scrub)
+              for(let j=i+1; j<foldCount; j++) {
+                 frameTracker[j] = -1;
+              }
+              frameTracker[i] = Math.round(seqObj.frame);
               drawFrame(frameTracker);
             }
           }, animLabel);
