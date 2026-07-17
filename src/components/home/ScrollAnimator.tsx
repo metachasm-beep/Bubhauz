@@ -16,7 +16,8 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLElement>(null);
   
-  const [sequences, setSequences] = useState<HTMLImageElement[][]>([[], [], [], [], [], []]);
+  const sequencesRef = useRef<HTMLImageElement[][]>([[], [], [], [], [], []]);
+  const [isReady, setIsReady] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   
   const frameCounts = [102, 102, 102, 102, 102, 102];
@@ -25,6 +26,8 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
 
   // Load images
   useEffect(() => {
+    if (sequencesRef.current[0].length > 0) return; // Prevent double load in strict mode
+    
     const configs = [
       (i: number) => `/heroscroll/${i.toString().padStart(3, "0")}.webp?v=1`,
       (i: number) => `/scroll2/use_the_clouds_whirlwind_image-ezremove_${i.toString().padStart(3, "0")}.webp?v=1`,
@@ -43,44 +46,27 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       if (totalLoaded % 10 === 0 || totalLoaded === totalFrames) {
         setLoadingProgress(Math.floor((totalLoaded / totalFrames) * 100));
       }
+      if (totalLoaded === totalFrames) {
+        setIsReady(true);
+      }
     };
 
-    const loadedAll: HTMLImageElement[][] = [[], [], [], [], [], []];
-
     configs.forEach((getUrl, seqIndex) => {
-      let seqLoadedCount = 0;
       for (let i = 0; i < frameCounts[seqIndex]; i++) {
         const img = new window.Image();
         
         img.onload = () => {
-          seqLoadedCount++;
           updateProgress();
           if (seqIndex === 0 && i === 0) drawFrame([0, -1, -1, -1, -1, -1]);
-          if (seqLoadedCount === frameCounts[seqIndex]) {
-            setSequences(prev => {
-              const next = [...prev];
-              next[seqIndex] = loadedAll[seqIndex];
-              return next;
-            });
-          }
         };
         
         img.onerror = () => {
           console.error(`Failed to load image: ${img.src}`);
-          // Still increment so we don't completely break the sequence loader
-          seqLoadedCount++;
           updateProgress();
-          if (seqLoadedCount === frameCounts[seqIndex]) {
-            setSequences(prev => {
-              const next = [...prev];
-              next[seqIndex] = loadedAll[seqIndex];
-              return next;
-            });
-          }
         };
         
         img.src = getUrl(i);
-        loadedAll[seqIndex].push(img);
+        sequencesRef.current[seqIndex].push(img);
       }
     });
   }, []);
@@ -141,8 +127,8 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     
     // Draw each active sequence layered on top of each other
     indices.forEach((frameIdx, seqIdx) => {
-      if (frameIdx >= 0 && sequences[seqIdx] && sequences[seqIdx].length > 0) {
-        const img = sequences[seqIdx][Math.round(frameIdx)];
+      if (frameIdx >= 0 && sequencesRef.current[seqIdx] && sequencesRef.current[seqIdx].length > 0) {
+        const img = sequencesRef.current[seqIdx][Math.round(frameIdx)];
         if (img) drawSingleImage(img, ctx, canvas);
       }
     });
@@ -150,8 +136,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
 
   // GSAP Observer Sequence (Zero Physical Scroll, Universal Parallax Folds)
   useEffect(() => {
-    const allLoaded = sequences.every((seq, i) => seq.length === frameCounts[i]);
-    if (!allLoaded || !containerRef.current) return;
+    if (!isReady || !containerRef.current) return;
 
     if (canvasRef.current) {
       canvasRef.current.width = window.innerWidth;
@@ -245,7 +230,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         tl.add(animLabel);
         
         // If there is a canvas sequence corresponding to this fold transition, play it!
-        if (i < sequences.length) {
+        if (i < sequencesRef.current.length) {
           const seqObj = { frame: 0 };
           tl.to(seqObj, {
             frame: frameCounts[i] - 1,
@@ -294,14 +279,14 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       ctx.revert();
       window.removeEventListener("resize", handleResize);
     };
-  }, [sequences, folds.length]);
+  }, [isReady, folds.length]);
 
   return (
     <section ref={containerRef} style={{ height: "100vh", position: "relative", overflow: "hidden" }}>
       <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100vh", overflow: "hidden", backgroundColor: "#000" }}>
         
         {/* Fallback Image */}
-        <div className={`absolute inset-0 z-0 transition-opacity duration-700 ${sequences[0]?.length === frameCounts[0] ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`absolute inset-0 z-0 transition-opacity duration-700 ${isReady ? 'opacity-0' : 'opacity-100'}`}>
             <Image src="/heroscroll/000.webp" alt="Hero Background" fill className="object-cover" priority />
         </div>
         
