@@ -29,7 +29,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       (i: number) => `/heroscroll/${i.toString().padStart(3, "0")}.webp?v=1`,
       (i: number) => `/scroll2/use_the_clouds_whirlwind_image-ezremove_${i.toString().padStart(3, "0")}.webp?v=1`,
       (i: number) => `/scroll3/use_the_baby_apparel_image_as-ezremove_${i.toString().padStart(3, "0")}.webp?v=1`,
-      (i: number) => `/scroll4/Basic Model-1784277948000_${i.toString().padStart(3, "0")}.webp?v=1`,
+      (i: number) => `/scroll4/Basic%20Model-1784277948000_${i.toString().padStart(3, "0")}.webp?v=1`,
       (i: number) => `/scroll5/use_the_baby_bed_image_as_firs_GStory_1784279637_${i.toString().padStart(3, "0")}.webp?v=1`,
       (i: number) => `/scroll6/use_the_baby_toys_image_as_fir_GStory_1784280854_${i.toString().padStart(3, "0")}.webp?v=1`
     ];
@@ -56,6 +56,19 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
           seqLoadedCount++;
           updateProgress();
           if (seqIndex === 0 && i === 0) drawFrame([0, -1, -1, -1, -1, -1]);
+          if (seqLoadedCount === frameCounts[seqIndex]) {
+            setSequences(prev => {
+              const next = [...prev];
+              next[seqIndex] = loadedAll[seqIndex];
+              return next;
+            });
+          }
+        };
+        img.onerror = () => {
+          console.error(`Failed to load image: ${img.src}`);
+          // Still increment so we don't completely break the sequence loader
+          seqLoadedCount++;
+          updateProgress();
           if (seqLoadedCount === frameCounts[seqIndex]) {
             setSequences(prev => {
               const next = [...prev];
