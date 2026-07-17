@@ -13,7 +13,6 @@ export default function Home() {
       <ProgressNav />
       <ScrollAnimator>
          <HeroOverlay />
-         <div className="blank-overlay w-full h-[100vh] pointer-events-none" />
          <MiniWardrobeOverlay />
          <NourishOverlay />
          <SleepOverlay />
