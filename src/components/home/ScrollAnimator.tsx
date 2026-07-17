@@ -51,7 +51,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       let seqLoadedCount = 0;
       for (let i = 0; i < frameCounts[seqIndex]; i++) {
         const img = new window.Image();
-        img.src = getUrl(i);
+        
         img.onload = () => {
           seqLoadedCount++;
           updateProgress();
@@ -64,6 +64,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
             });
           }
         };
+        
         img.onerror = () => {
           console.error(`Failed to load image: ${img.src}`);
           // Still increment so we don't completely break the sequence loader
@@ -77,6 +78,8 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
             });
           }
         };
+        
+        img.src = getUrl(i);
         loadedAll[seqIndex].push(img);
       }
     });
