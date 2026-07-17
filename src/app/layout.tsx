@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import SiteDock from "@/components/ui/SiteDock";
+import SiteHeader from "@/components/ui/SiteHeader";
 import SiteFooter from "@/components/ui/SiteFooter";
 import CookieConsent from "@/components/ui/CookieConsent";
 import SmoothScrolling from "@/components/ui/SmoothScrolling";
@@ -20,12 +20,12 @@ export default function RootLayout({
     <html lang="en" className="antialiased">
       <body className="min-h-screen flex flex-col">
         <SmoothScrolling>
+          <SiteHeader />
           <div className="fixed inset-0 z-50 pointer-events-none">
             <SplashCursor />
           </div>
           {children}
           <SiteFooter />
-          <SiteDock />
           <CookieConsent />
         </SmoothScrolling>
       </body>

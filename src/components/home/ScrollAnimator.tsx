@@ -113,11 +113,18 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       ctx.filter = 'blur(30px) brightness(0.3)';
       ctx.drawImage(img, bgOffsetX, 0, bgWidth, bgHeight);
       
-      // 2. Draw contained sharp image in center
+      // 2. Draw contained sharp image shifted to the top (clears nav bar, leaves massive empty space at bottom for text)
       ctx.filter = 'none';
       let fgWidth = canvas.width;
       let fgHeight = canvas.width / imgRatio;
-      let fgOffsetY = (canvas.height - fgHeight) / 2;
+      // Shift it up to 80px from top instead of centering it, freeing up the bottom half completely.
+      let fgOffsetY = 80; 
+      
+      // If the image is extremely tall (rare), don't let it overflow the bottom
+      if (fgOffsetY + fgHeight > canvas.height) {
+         fgOffsetY = (canvas.height - fgHeight) / 2; 
+      }
+      
       ctx.drawImage(img, 0, fgOffsetY, fgWidth, fgHeight);
     } else {
       // Standard cover behavior for desktop
