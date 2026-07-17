@@ -199,6 +199,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       tl.to([".hero-title-word", ".hero-subtitle", ".hero-button"], {
         opacity: 0,
         y: -20,
+        filter: "blur(10px)",
         duration: 2,
         ease: "power2.inOut"
       }, "hero-out");
@@ -254,9 +255,9 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         }, textInLabel);
         
         // Animate the text elements for the current fold IN
-        tl.to(`.fold-${i} .fold-title`, { opacity: 1, y: 0, duration: 2, ease: "power2.out" }, `${textInLabel}+=0.5`)
-          .to(`.fold-${i} .fold-subtitle`, { opacity: 1, y: 0, duration: 2, ease: "power2.out" }, `${textInLabel}+=1`)
-          .to(`.fold-${i} .fold-button`, { opacity: 1, scale: 1, duration: 2, ease: "back.out(1.7)" }, `${textInLabel}+=1.5`);
+        tl.to(`.fold-${i} .fold-title`, { opacity: 1, y: 0, filter: "blur(0px)", duration: 2, ease: "power2.out" }, `${textInLabel}+=0.5`)
+          .to(`.fold-${i} .fold-subtitle`, { opacity: 1, y: 0, filter: "blur(0px)", duration: 2, ease: "power2.out" }, `${textInLabel}+=1`)
+          .to(`.fold-${i} .fold-button`, { opacity: 1, scale: 1, filter: "blur(0px)", duration: 2, ease: "back.out(1.7)" }, `${textInLabel}+=1.5`);
         
         tl.to({}, { duration: 3 }); // Pause for user to read
         
@@ -265,6 +266,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         tl.to([`.fold-${i} .fold-title`, `.fold-${i} .fold-subtitle`, `.fold-${i} .fold-button`], {
           opacity: 0,
           y: -20,
+          filter: "blur(10px)",
           duration: 2,
           ease: "power2.inOut"
         }, textOutLabel);
@@ -342,8 +344,8 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
           style={{ width: "100%", height: "100%", display: "block", transformOrigin: "center center" }}
         />
         
-        {/* Subtle overlay to ensure text is readable over the canvas */}
-        <div className="absolute inset-0 bg-black/20 z-10 pointer-events-none" />
+        {/* Subtle overlay to ensure text is readable over the canvas without glass cards */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/60 z-10 pointer-events-none" />
 
         {/* UNIVERSAL FOLDS CONTAINER */}
         <div className="universal-folds-container absolute inset-0 z-20 pointer-events-none">

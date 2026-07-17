@@ -14,8 +14,8 @@ export default function SiteHeader() {
   return (
     <header className="fixed top-0 left-0 w-full h-16 z-[100] bg-black/40 backdrop-blur-lg border-b border-white/10 shadow-lg flex items-center justify-between px-6 md:px-12 transition-all duration-300">
       {/* Logo */}
-      <Link href="/" className="flex flex-col">
-        <span className="hidden md:block text-white text-xl font-bold tracking-widest uppercase">Bubhauz</span>
+      <Link href="/" className="flex items-center gap-2">
+        <img src="/logo.webp" alt="Bubhauz Logo" className="w-10 h-10 rounded-full shadow-lg border border-white/20" />
       </Link>
 
       {/* Navigation */}
