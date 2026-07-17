@@ -98,6 +98,8 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
   }, []);
 
   const drawSingleImage = (img: HTMLImageElement, ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
+    if (!img || !img.complete || img.naturalHeight === 0) return; // Prevent broken image exception
+    
     const canvasRatio = canvas.width / canvas.height;
     const imgRatio = img.width / img.height;
     
@@ -150,8 +152,8 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
           trigger: containerRef.current,
           pin: true,
           start: "top top",
-          end: "+=10000", // Increased from 5000 for 6 folds
-          scrub: 1.5, // Increased lag for a smoother, slower feel
+          end: "+=7000", // Adjusted from 10000 for more responsive scrolling
+          scrub: 1.5, // Smooth lag
         }
       });
       const foldCount = folds.length;
