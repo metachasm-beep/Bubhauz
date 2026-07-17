@@ -1,16 +1,20 @@
 export default function SleepOverlay() {
   return (
-    <div className="absolute top-0 left-0 w-full h-[100vh] flex flex-col justify-end pb-[8vh] md:pb-0 md:justify-center items-center pointer-events-none z-30">
-      <div className="relative z-20 text-center px-4 max-w-5xl mx-auto pointer-events-auto flex flex-col items-center">
-        <h2 className="fold-title text-4xl md:text-7xl lg:text-[7rem] font-bold text-white mb-6 drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)] tracking-tight leading-none font-heading" style={{ opacity: 0, transform: 'translateY(60px)', filter: 'blur(10px)' }}>
-          Sleep & Nursery
+    <div className="absolute inset-0 w-full h-[100dvh] flex flex-col justify-end md:justify-center items-start text-left pl-6 pr-6 md:pl-[10vw] md:pr-[50vw] pb-[15vh] md:pb-0 pointer-events-none z-30">
+      <div className="pointer-events-auto flex flex-col items-start gap-6">
+        <h2 className="text-5xl md:text-[6vw] font-light text-white tracking-tighter leading-[1.1] drop-shadow-md">
+          <span className="animate-up inline-block" style={{ opacity: 0, transform: 'translateY(24px)' }}>Sleep</span>{' '}
+          <span className="animate-up inline-block" style={{ opacity: 0, transform: 'translateY(24px)' }}>&amp;</span>{' '}
+          <span className="animate-up inline-block font-medium" style={{ opacity: 0, transform: 'translateY(24px)' }}>Nursery.</span>
         </h2>
-        <p className="fold-subtitle text-base md:text-2xl text-white max-w-3xl mx-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] font-medium opacity-90 mb-10" style={{ opacity: 0, transform: 'translateY(60px)', filter: 'blur(10px)' }}>
+        <p className="animate-up text-lg md:text-xl text-white/90 max-w-[35ch] leading-relaxed drop-shadow-sm" style={{ opacity: 0, transform: 'translateY(24px)' }}>
           Cozy, safe, and dreamy essentials for peaceful nights.
         </p>
-        <button className="fold-button liquid-button px-10 py-5 bg-[var(--primary)] text-white rounded-full text-xl font-bold hover:bg-[var(--primary-hover)] transition-all duration-300 shadow-glass-colored" style={{ opacity: 0, transform: 'scale(0.8)', filter: 'blur(10px)' }}>
-          Shop Nursery
-        </button>
+        <div className="animate-up mt-4" style={{ opacity: 0, transform: 'translateY(24px)' }}>
+           <button className="text-sm uppercase tracking-[0.2em] font-medium border-b border-white/30 pb-1 hover:border-white transition-colors cursor-pointer text-white">
+             Shop Nursery
+           </button>
+        </div>
       </div>
     </div>
   );

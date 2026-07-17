@@ -1,18 +1,15 @@
 export default function HeroOverlay() {
   return (
-    <div className="hero-overlay-container absolute top-0 left-0 w-full h-[100vh] flex flex-col justify-end pb-[8vh] md:pb-0 md:justify-center items-center pointer-events-none z-30">
-      <div className="text-center px-4 max-w-4xl mx-auto flex flex-col items-center pointer-events-auto">
-        <div className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 animate-float drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)] flex gap-3 flex-wrap justify-center items-center font-heading">
-          <span className="hero-title-word inline-block drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]" style={{ opacity: 0, filter: 'blur(10px)', transform: 'translateY(30px)' }}>Welcome to the</span>
-          <span className="hero-title-word text-[var(--primary)] drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)] inline-block" style={{ opacity: 0, filter: 'blur(10px)', transform: 'translateY(30px)' }}>Bubhauz</span>
-          <span className="hero-title-word inline-block drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]" style={{ opacity: 0, filter: 'blur(10px)', transform: 'translateY(30px)' }}>Family</span>
-        </div>
-        <p className="hero-subtitle text-lg md:text-2xl text-[var(--foreground)] mb-10 font-semibold max-w-2xl glass-card p-6" style={{ opacity: 0, transform: 'translateX(-40px)' }}>
+    <div className="absolute inset-0 w-full h-[100dvh] flex flex-col justify-end md:justify-center items-start text-left pl-6 pr-6 md:pl-[10vw] md:pr-[50vw] pb-[15vh] md:pb-0 pointer-events-none z-30">
+      <div className="pointer-events-auto flex flex-col items-start gap-6">
+        <h1 className="text-5xl md:text-[6vw] font-light text-white tracking-tighter leading-[1.1] drop-shadow-md flex flex-wrap gap-x-[1.5vw] gap-y-2">
+          <span className="animate-up inline-block" style={{ opacity: 0, transform: 'translateY(24px)' }}>Welcome</span>
+          <span className="animate-up inline-block" style={{ opacity: 0, transform: 'translateY(24px)' }}>to</span>
+          <span className="animate-up inline-block font-medium" style={{ opacity: 0, transform: 'translateY(24px)' }}>Bubhauz.</span>
+        </h1>
+        <p className="animate-up text-lg md:text-xl text-white/90 max-w-[35ch] leading-relaxed drop-shadow-sm" style={{ opacity: 0, transform: 'translateY(24px)' }}>
           Gentle, safe, and beautifully crafted essentials for your little one's everyday adventures.
         </p>
-        <button className="hero-button liquid-button px-10 py-5 bg-[var(--primary)] text-white rounded-full text-xl font-bold hover:bg-[var(--primary-hover)] transition-all duration-300 shadow-glass-colored" style={{ opacity: 0, transform: 'scale(0.8)', filter: 'blur(10px)' }}>
-          Explore Our Nursery Collection
-        </button>
       </div>
     </div>
   );

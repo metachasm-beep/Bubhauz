@@ -233,19 +233,22 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         }, textInLabel);
         
         // Animate the text elements IN (Supports both Hero and Standard folds)
-        tl.to([`.fold-${i} .hero-title-word`, `.fold-${i} .fold-title`], { opacity: 1, y: 0, filter: "blur(0px)", stagger: 0.2, duration: 2, ease: "power2.out" }, `${textInLabel}+=0.5`)
-          .to([`.fold-${i} .hero-subtitle`, `.fold-${i} .fold-subtitle`], { opacity: 1, y: 0, x: 0, filter: "blur(0px)", duration: 2, ease: "power2.out" }, `${textInLabel}+=1`)
-          .to([`.fold-${i} .hero-button`, `.fold-${i} .fold-button`], { opacity: 1, scale: 1, filter: "blur(0px)", duration: 2, ease: "back.out(1.7)" }, `${textInLabel}+=1.5`);
+        tl.to(`.fold-${i} .animate-up`, { 
+          opacity: 1, 
+          y: 0, 
+          stagger: 0.15, 
+          duration: 1.2, 
+          ease: "power3.out" 
+        }, `${textInLabel}+=0.2`);
         
         tl.to({}, { duration: 3 }); // Pause for user to read
         
         // --- PHASE: TEXT OUT FOR FOLD i ---
         tl.add(textOutLabel);
-        tl.to([`.fold-${i} .hero-title-word`, `.fold-${i} .fold-title`, `.fold-${i} .hero-subtitle`, `.fold-${i} .fold-subtitle`, `.fold-${i} .hero-button`, `.fold-${i} .fold-button`], {
+        tl.to(`.fold-${i} .animate-up`, {
           opacity: 0,
-          y: -20,
-          filter: "blur(10px)",
-          duration: 2,
+          y: -24,
+          duration: 1.2,
           ease: "power2.inOut"
         }, textOutLabel);
       }
