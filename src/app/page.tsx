@@ -13,11 +13,11 @@ export default function Home() {
       <ProgressNav />
       <ScrollAnimator>
          <HeroOverlay />
-         <MamaEditOverlay />
          <MiniWardrobeOverlay />
          <NourishOverlay />
          <SleepOverlay />
          <PlayOverlay />
+         <MamaEditOverlay />
       </ScrollAnimator>
     </main>
   );

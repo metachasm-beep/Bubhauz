@@ -30,11 +30,11 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     
     const configs = [
       (i: number) => `/heroscroll/${i.toString().padStart(3, "0")}.webp?v=1`,
-      (i: number) => `/scroll2/use_the_clouds_whirlwind_image-ezremove_${i.toString().padStart(3, "0")}.webp?v=1`,
       (i: number) => `/scroll3/use_the_baby_apparel_image_as-ezremove_${i.toString().padStart(3, "0")}.webp?v=1`,
       (i: number) => `/scroll4/Basic%20Model-1784277948000_${i.toString().padStart(3, "0")}.webp?v=1`,
       (i: number) => `/scroll5/use_the_baby_bed_image_as_firs_GStory_1784279637_${i.toString().padStart(3, "0")}.webp?v=1`,
-      (i: number) => `/scroll6/use_the_baby_toys_image_as_fir_GStory_1784280854_${i.toString().padStart(3, "0")}.webp?v=1`
+      (i: number) => `/scroll6/use_the_baby_toys_image_as_fir_GStory_1784280854_${i.toString().padStart(3, "0")}.webp?v=1`,
+      (i: number) => `/scroll2/use_the_clouds_whirlwind_image-ezremove_${i.toString().padStart(3, "0")}.webp?v=1`
     ];
 
     let totalLoaded = 0;
@@ -113,13 +113,14 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       ctx.filter = 'blur(30px) brightness(0.3)';
       ctx.drawImage(img, bgOffsetX, 0, bgWidth, bgHeight);
       
-      // 2. Draw contained sharp image perfectly in the center (middle third)
+      // 2. Draw contained sharp image perfectly in the center (middle third), zoomed by 15%
       ctx.filter = 'none';
-      let fgWidth = canvas.width;
-      let fgHeight = canvas.width / imgRatio;
+      let fgWidth = canvas.width * 1.15;
+      let fgHeight = (canvas.width / imgRatio) * 1.15;
+      let fgOffsetX = (canvas.width - fgWidth) / 2;
       let fgOffsetY = (canvas.height - fgHeight) / 2; 
       
-      ctx.drawImage(img, 0, fgOffsetY, fgWidth, fgHeight);
+      ctx.drawImage(img, fgOffsetX, fgOffsetY, fgWidth, fgHeight);
     } else {
       // Standard cover behavior for desktop
       let drawWidth = canvas.width;
