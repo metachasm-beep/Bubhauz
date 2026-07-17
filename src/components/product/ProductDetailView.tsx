@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface ProductDetailViewProps {
@@ -33,13 +34,13 @@ export default function ProductDetailView({ id }: ProductDetailViewProps) {
       
       {/* Sticky Header */}
       <header className="fixed top-0 left-0 w-full z-50 px-6 py-4 flex items-center justify-between mix-blend-difference text-[#F9F6F0]">
-        <button 
-          onClick={() => router.back()} 
+        <Link 
+          href={`/category/${category}`}
           className="inline-flex items-center gap-2 text-sm uppercase tracking-widest font-medium hover:text-[#C67D53] transition-colors"
         >
           <ArrowLeft size={16} />
-          Back
-        </button>
+          Back to {category}
+        </Link>
         <span className="text-xs uppercase tracking-[0.3em] font-light opacity-50 hidden md:block">
           Bubhauz // {category}
         </span>
