@@ -244,25 +244,15 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         tl.to({}, { duration: 3 }); // Pause for user to read
         
         // --- PHASE: TEXT OUT FOR FOLD i ---
-        tl.add(textOutLabel);
-        tl.to(`.fold-${i} .animate-up`, {
-          opacity: 0,
-          filter: "blur(10px)",
-          duration: 1.2,
-          ease: "power2.inOut"
-        }, textOutLabel);
-      }
-
-      // ---- TRANSITION IN FOOTER OVERLAY ----
-      tl.add("footerIn");
-      const footerEl = document.getElementById("global-footer");
-      if (footerEl) {
-        tl.to(footerEl, { 
-          opacity: 1, 
-          pointerEvents: "auto",
-          duration: 1, 
-          ease: "power2.inOut" 
-        }, "footerIn");
+        if (i < foldCount - 1) {
+          tl.add(textOutLabel);
+          tl.to(`.fold-${i} .animate-up`, {
+            opacity: 0,
+            filter: "blur(10px)",
+            duration: 1.2,
+            ease: "power2.inOut"
+          }, textOutLabel);
+        }
       }
 
     }, containerRef);
@@ -271,7 +261,6 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       if (canvasRef.current) {
         canvasRef.current.width = window.innerWidth;
         canvasRef.current.height = window.innerHeight;
-        // Basic redraw
         drawFrame([frameCounts[0] - 1, -1, -1, -1, -1, -1]);
       }
     };
