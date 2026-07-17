@@ -252,12 +252,15 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
 
       // ---- TRANSITION IN FOOTER OVERLAY ----
       tl.add("footerIn");
-      tl.to("#global-footer", { 
-        opacity: 1, 
-        pointerEvents: "auto",
-        duration: 1, 
-        ease: "power2.inOut" 
-      }, "footerIn");
+      const footerEl = document.getElementById("global-footer");
+      if (footerEl) {
+        tl.to(footerEl, { 
+          opacity: 1, 
+          pointerEvents: "auto",
+          duration: 1, 
+          ease: "power2.inOut" 
+        }, "footerIn");
+      }
 
     }, containerRef);
 
