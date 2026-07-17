@@ -2,6 +2,9 @@ import ScrollAnimator from "@/components/home/ScrollAnimator";
 import HeroOverlay from "@/components/home/HeroOverlay";
 import MiniWardrobeOverlay from "@/components/home/MiniWardrobeOverlay";
 import NourishOverlay from "@/components/home/NourishOverlay";
+import SleepOverlay from "@/components/home/SleepOverlay";
+import PlayOverlay from "@/components/home/PlayOverlay";
+import MamaEditOverlay from "@/components/home/MamaEditOverlay";
 import ProgressNav from "@/components/ui/ProgressNav";
 
 export default function Home() {
@@ -12,6 +15,9 @@ export default function Home() {
          <HeroOverlay />
          <MiniWardrobeOverlay />
          <NourishOverlay />
+         <SleepOverlay />
+         <PlayOverlay />
+         <MamaEditOverlay />
       </ScrollAnimator>
     </main>
   );

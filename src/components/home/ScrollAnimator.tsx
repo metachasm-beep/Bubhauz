@@ -16,78 +16,57 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLElement>(null);
   
-  const [seq1Images, setSeq1Images] = useState<HTMLImageElement[]>([]);
-  const [seq2Images, setSeq2Images] = useState<HTMLImageElement[]>([]);
-  const [seq3Images, setSeq3Images] = useState<HTMLImageElement[]>([]);
+  const [sequences, setSequences] = useState<HTMLImageElement[][]>([[], [], [], [], [], []]);
   const [loadingProgress, setLoadingProgress] = useState(0);
   
-  const frameCount1 = 102;
-  const frameCount2 = 102;
-  const frameCount3 = 102;
-  
-  const sequences = [seq1Images, seq2Images, seq3Images];
-  const frameCounts = [frameCount1, frameCount2, frameCount3];
+  const frameCounts = [102, 102, 102, 102, 102, 102];
   
   const folds = Children.toArray(children);
 
   // Load images
   useEffect(() => {
-    const loadedSeq1: HTMLImageElement[] = [];
-    const loadedSeq2: HTMLImageElement[] = [];
-    const loadedSeq3: HTMLImageElement[] = [];
-    let loadedCount1 = 0;
-    let loadedCount2 = 0;
-    let loadedCount3 = 0;
+    const configs = [
+      (i: number) => `/heroscroll/${i.toString().padStart(3, "0")}.webp?v=1`,
+      (i: number) => `/scroll2/use_the_clouds_whirlwind_image-ezremove_${i.toString().padStart(3, "0")}.webp?v=1`,
+      (i: number) => `/scroll3/use_the_baby_apparel_image_as-ezremove_${i.toString().padStart(3, "0")}.webp?v=1`,
+      (i: number) => `/scroll4/Basic Model-1784277948000_${i.toString().padStart(3, "0")}.webp?v=1`,
+      (i: number) => `/scroll5/use_the_baby_bed_image_as_firs_GStory_1784279637_${i.toString().padStart(3, "0")}.webp?v=1`,
+      (i: number) => `/scroll6/use_the_baby_toys_image_as_fir_GStory_1784280854_${i.toString().padStart(3, "0")}.webp?v=1`
+    ];
+
     let totalLoaded = 0;
-    const totalFrames = frameCount1 + frameCount2 + frameCount3;
-    
+    const totalFrames = frameCounts.reduce((a, b) => a + b, 0);
+
     const updateProgress = () => {
       totalLoaded++;
       // Throttle state updates to prevent re-render spam
-      if (totalLoaded % 5 === 0 || totalLoaded === totalFrames) {
+      if (totalLoaded % 10 === 0 || totalLoaded === totalFrames) {
         setLoadingProgress(Math.floor((totalLoaded / totalFrames) * 100));
       }
     };
 
-    // Load Sequence 1
-    for (let i = 0; i < frameCount1; i++) {
-      const img = new window.Image();
-      const paddedIndex = i.toString().padStart(3, "0");
-      img.src = `/heroscroll/${paddedIndex}.webp?v=1`;
-      img.onload = () => {
-        loadedCount1++;
-        updateProgress();
-        if (i === 0) drawFrame([0]);
-        if (loadedCount1 === frameCount1) setSeq1Images(loadedSeq1);
-      };
-      loadedSeq1.push(img);
-    }
+    const loadedAll: HTMLImageElement[][] = [[], [], [], [], [], []];
 
-    // Load Sequence 2
-    for (let i = 0; i < frameCount2; i++) {
-      const img = new window.Image();
-      const paddedIndex = i.toString().padStart(3, "0");
-      img.src = `/scroll2/use_the_clouds_whirlwind_image-ezremove_${paddedIndex}.webp?v=1`;
-      img.onload = () => {
-        loadedCount2++;
-        updateProgress();
-        if (loadedCount2 === frameCount2) setSeq2Images(loadedSeq2);
-      };
-      loadedSeq2.push(img);
-    }
-
-    // Load Sequence 3
-    for (let i = 0; i < frameCount3; i++) {
-      const img = new window.Image();
-      const paddedIndex = i.toString().padStart(3, "0");
-      img.src = `/scroll3/use_the_baby_apparel_image_as-ezremove_${paddedIndex}.webp?v=1`;
-      img.onload = () => {
-        loadedCount3++;
-        updateProgress();
-        if (loadedCount3 === frameCount3) setSeq3Images(loadedSeq3);
-      };
-      loadedSeq3.push(img);
-    }
+    configs.forEach((getUrl, seqIndex) => {
+      let seqLoadedCount = 0;
+      for (let i = 0; i < frameCounts[seqIndex]; i++) {
+        const img = new window.Image();
+        img.src = getUrl(i);
+        img.onload = () => {
+          seqLoadedCount++;
+          updateProgress();
+          if (seqIndex === 0 && i === 0) drawFrame([0, -1, -1, -1, -1, -1]);
+          if (seqLoadedCount === frameCounts[seqIndex]) {
+            setSequences(prev => {
+              const next = [...prev];
+              next[seqIndex] = loadedAll[seqIndex];
+              return next;
+            });
+          }
+        };
+        loadedAll[seqIndex].push(img);
+      }
+    });
   }, []);
 
   // Hide global footer on mount so it can be animated in at the end
@@ -155,12 +134,13 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
 
   // GSAP Observer Sequence (Zero Physical Scroll, Universal Parallax Folds)
   useEffect(() => {
-    if (seq1Images.length !== frameCount1 || seq2Images.length !== frameCount2 || seq3Images.length !== frameCount3 || !containerRef.current) return;
+    const allLoaded = sequences.every((seq, i) => seq.length === frameCounts[i]);
+    if (!allLoaded || !containerRef.current) return;
 
     if (canvasRef.current) {
       canvasRef.current.width = window.innerWidth;
       canvasRef.current.height = window.innerHeight;
-      drawFrame([0]);
+      drawFrame([0, -1, -1, -1, -1, -1]);
     }
 
     const ctx = gsap.context(() => {
@@ -169,7 +149,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
           trigger: containerRef.current,
           pin: true,
           start: "top top",
-          end: "+=5000", // Reduced from 12000 so it takes fewer scrolls!
+          end: "+=10000", // Increased from 5000 for 6 folds
           scrub: 1.5, // Increased lag for a smoother, slower feel
         }
       });
@@ -187,7 +167,8 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       gsap.to(".hero-button", { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)", delay: 1.1 });
 
       // ---- CANVAS SEQUENCE 0 (Hero Anim) ----
-      const frameTracker = [0, -1, -1]; // Tracks the current frame of each sequence
+      const frameTracker = [-1, -1, -1, -1, -1, -1]; // Tracks the current frame of each sequence
+      frameTracker[0] = 0;
       
       tl.add("canvas-anim-0");
       const frameObj0 = { frame: 0 };
@@ -236,14 +217,10 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         }, textLabel);
         
         // Animate the text elements for the current fold
-        if (i === 1) { // Wardrobe (Fold 2)
-          tl.to(".wardrobe-title", { opacity: 1, y: 0, duration: 2, ease: "power2.out" }, `${textLabel}+=2`)
-          .to(".wardrobe-subtitle", { opacity: 1, y: 0, duration: 2, ease: "power2.out" }, `${textLabel}+=2.5`)
-          .to(".wardrobe-button", { opacity: 1, scale: 1, duration: 2, ease: "back.out(1.7)" }, `${textLabel}+=3`);
-        } else if (i === 2) { // Nourish (Fold 3)
-          tl.to(".nourish-title", { opacity: 1, y: 0, duration: 2, ease: "power2.out" }, `${textLabel}+=2`)
-          .to(".nourish-subtitle", { opacity: 1, y: 0, duration: 2, ease: "power2.out" }, `${textLabel}+=2.5`)
-          .to(".nourish-button", { opacity: 1, scale: 1, duration: 2, ease: "back.out(1.7)" }, `${textLabel}+=3`);
+        if (i >= 1) { 
+          tl.to(`.fold-${i} .fold-title`, { opacity: 1, y: 0, duration: 2, ease: "power2.out" }, `${textLabel}+=2`)
+            .to(`.fold-${i} .fold-subtitle`, { opacity: 1, y: 0, duration: 2, ease: "power2.out" }, `${textLabel}+=2.5`)
+            .to(`.fold-${i} .fold-button`, { opacity: 1, scale: 1, duration: 2, ease: "back.out(1.7)" }, `${textLabel}+=3`);
         }
         
         tl.to({}, { duration: 3 }); // Large pause for user to read before canvas scrub starts
@@ -289,7 +266,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         canvasRef.current.width = window.innerWidth;
         canvasRef.current.height = window.innerHeight;
         // Basic redraw
-        drawFrame([frameCount1 - 1, -1, -1]);
+        drawFrame([frameCounts[0] - 1, -1, -1, -1, -1, -1]);
       }
     };
     window.addEventListener("resize", handleResize);
@@ -298,14 +275,14 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       ctx.revert();
       window.removeEventListener("resize", handleResize);
     };
-  }, [seq1Images, seq2Images, seq3Images, folds.length]);
+  }, [sequences, folds.length]);
 
   return (
     <section ref={containerRef} style={{ height: "100vh", position: "relative", overflow: "hidden" }}>
       <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100vh", overflow: "hidden", backgroundColor: "#000" }}>
         
         {/* Fallback Image */}
-        <div className={`absolute inset-0 z-0 transition-opacity duration-700 ${seq1Images.length === frameCount1 ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`absolute inset-0 z-0 transition-opacity duration-700 ${sequences[0]?.length === frameCounts[0] ? 'opacity-0' : 'opacity-100'}`}>
             <Image src="/heroscroll/000.webp" alt="Hero Background" fill className="object-cover" priority />
         </div>
         
