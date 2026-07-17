@@ -160,7 +160,6 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
 
       // INITIAL STATE SETUP
       if (foldCount > 0) {
-        gsap.set(".fold-wrapper", { yPercent: (i) => i === 0 ? 0 : 100 });
         gsap.set(".fold-wrapper", { autoAlpha: (i) => i === 0 ? 1 : 0 }); 
       }
 
@@ -169,10 +168,23 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       gsap.to(".hero-subtitle", { opacity: 1, x: 0, duration: 1, ease: "power2.out", delay: 0.8 });
       gsap.to(".hero-button", { opacity: 1, scale: 1, duration: 1, ease: "back.out(1.7)", delay: 1.1 });
 
-      // ---- CANVAS SEQUENCE 0 (Hero Anim) ----
       const frameTracker = [-1, -1, -1, -1, -1, -1]; // Tracks the current frame of each sequence
       frameTracker[0] = 0;
       
+      // ============================================
+      // HERO TEXT FADE OUT (Immediately on scroll)
+      // ============================================
+      tl.add("hero-out");
+      tl.to([".hero-title-word", ".hero-subtitle", ".hero-button"], {
+        opacity: 0,
+        y: -20,
+        duration: 2,
+        ease: "power2.inOut"
+      }, "hero-out");
+
+      // ============================================
+      // HERO CANVAS SCRUB
+      // ============================================
       tl.add("canvas-anim-0");
       const frameObj0 = { frame: -1 };
       tl.to(frameObj0, {
@@ -193,46 +205,49 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       
       tl.to({}, { duration: 1 }); // Pause before next fold
 
-      // ---- UNIVERSAL PARALLAX SLIDER ----
-      // Loop over every subsequent fold and slide it up with a parallax effect
+      // ============================================
+      // UNIVERSAL PARALLAX SLIDER (Folds 1 to 5)
+      // ============================================
       for (let i = 1; i < foldCount; i++) {
-        const textLabel = `text-in-${i}`;
+        const textInLabel = `text-in-${i}`;
+        const textOutLabel = `text-out-${i}`;
         const animLabel = `canvas-anim-${i}`;
         const duration = 8; // HUGE duration relative to the timeline so it maps to a large scroll chunk
         
-        // --- PHASE: PREVIOUS TEXT OUT & NEW TEXT IN ---
-        tl.add(textLabel);
+        // --- PHASE: PREVIOUS FOLD HIDE & NEW TEXT IN ---
+        tl.add(textInLabel);
         
-        // Fade out previous fold's wrapper completely
-        tl.to(`.fold-${i - 1}`, { 
-           yPercent: -30, // Subtle parallax
-           opacity: 0,  
-           duration: 4, // Slow, elegant fade out
-           ease: "power2.inOut" 
-        }, textLabel);
+        // Hide previous fold's wrapper completely (its text is already out, but this prevents clicks/overlap)
+        tl.set(`.fold-${i - 1}`, { autoAlpha: 0 }, textInLabel);
         
         // Fade in current fold's wrapper
         tl.to(`.fold-${i}`, { 
-           yPercent: 0, 
            autoAlpha: 1, 
-           duration: 4, // Slow, elegant slide in
+           duration: 2,
            ease: "power2.inOut",
            onStart: () => {
              if (typeof navigator !== 'undefined' && navigator.vibrate) {
                navigator.vibrate(50);
              }
            }
-        }, textLabel);
+        }, textInLabel);
         
-        // Animate the text elements for the current fold
-        if (i >= 1) { 
-          tl.to(`.fold-${i} .fold-title`, { opacity: 1, y: 0, duration: 2, ease: "power2.out" }, `${textLabel}+=2`)
-            .to(`.fold-${i} .fold-subtitle`, { opacity: 1, y: 0, duration: 2, ease: "power2.out" }, `${textLabel}+=2.5`)
-            .to(`.fold-${i} .fold-button`, { opacity: 1, scale: 1, duration: 2, ease: "back.out(1.7)" }, `${textLabel}+=3`);
-        }
+        // Animate the text elements for the current fold IN
+        tl.to(`.fold-${i} .fold-title`, { opacity: 1, y: 0, duration: 2, ease: "power2.out" }, `${textInLabel}+=0.5`)
+          .to(`.fold-${i} .fold-subtitle`, { opacity: 1, y: 0, duration: 2, ease: "power2.out" }, `${textInLabel}+=1`)
+          .to(`.fold-${i} .fold-button`, { opacity: 1, scale: 1, duration: 2, ease: "back.out(1.7)" }, `${textInLabel}+=1.5`);
         
-        tl.to({}, { duration: 3 }); // Large pause for user to read before canvas scrub starts
+        tl.to({}, { duration: 3 }); // Pause for user to read
         
+        // --- PHASE: CURRENT TEXT OUT ---
+        tl.add(textOutLabel);
+        tl.to([`.fold-${i} .fold-title`, `.fold-${i} .fold-subtitle`, `.fold-${i} .fold-button`], {
+          opacity: 0,
+          y: -20,
+          duration: 2,
+          ease: "power2.inOut"
+        }, textOutLabel);
+
         // --- PHASE: CANVAS ANIMATION ---
         tl.add(animLabel);
         
@@ -252,7 +267,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
               for(let j=i+1; j<foldCount; j++) {
                  frameTracker[j] = -1;
               }
-              frameTracker[i] = Math.round(seqObj.frame);
+              frameTracker[i] = Math.max(0, Math.round(seqObj.frame));
               drawFrame(frameTracker);
             }
           }, animLabel);
