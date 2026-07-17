@@ -13,9 +13,9 @@ export default function MamaEditOverlay() {
           Because you deserve premium care, too.
         </p>
         <div className="animate-up mt-4 flex items-center gap-6" style={{ opacity: 0, filter: 'blur(20px)' }}>
-           <button className="text-sm uppercase tracking-[0.2em] font-medium border-b border-[#F9F6F0]/30 pb-1 hover:border-[#F9F6F0] transition-colors cursor-pointer text-[#F9F6F0]">
+           <Link href="/category/mama" className="inline-block text-sm uppercase tracking-[0.2em] font-medium border-b border-[#F9F6F0]/30 pb-1 hover:border-[#F9F6F0] transition-colors cursor-pointer text-[#F9F6F0]">
              Shop Mama
-           </button>
+           </Link>
            <button 
              onClick={() => window.dispatchEvent(new Event("toggle-footer"))}
              className="text-sm uppercase tracking-[0.2em] font-medium text-[#C67D53] hover:text-[#F9F6F0] transition-colors cursor-pointer"
