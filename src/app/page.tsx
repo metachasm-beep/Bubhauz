@@ -13,11 +13,12 @@ export default function Home() {
       <ProgressNav />
       <ScrollAnimator>
          <HeroOverlay />
-         <MamaEditOverlay />
+         <div className="blank-overlay w-full h-[100vh] pointer-events-none" />
          <MiniWardrobeOverlay />
          <NourishOverlay />
          <SleepOverlay />
          <PlayOverlay />
+         <MamaEditOverlay />
       </ScrollAnimator>
     </main>
   );
