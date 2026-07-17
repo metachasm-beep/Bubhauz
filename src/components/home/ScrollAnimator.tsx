@@ -174,7 +174,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
           trigger: containerRef.current,
           pin: true,
           start: "top top",
-          end: "+=7000", // Adjusted from 10000 for more responsive scrolling
+          end: "+=14000", // Doubled to reduce scroll animation speed to 50%
           scrub: 1.5, // Smooth lag
         }
       });

@@ -22,25 +22,10 @@ export default function ProgressNav() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const skipToShop = () => {
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: "smooth"
-    });
-  };
+
 
   return (
     <>
-      {/* Skip Presentation Button */}
-      <div className="fixed top-6 right-6 z-50">
-        <button 
-          onClick={skipToShop}
-          className="px-4 py-2 rounded-full border border-white/20 bg-black/20 backdrop-blur-md text-white/70 text-xs font-semibold uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all duration-300"
-        >
-          Skip to Shop
-        </button>
-      </div>
-
       {/* Vertical Progress Bar */}
       <div className="fixed right-8 top-1/2 -translate-y-1/2 h-48 w-[2px] bg-white/10 z-50 hidden md:block rounded-full">
         <div 
