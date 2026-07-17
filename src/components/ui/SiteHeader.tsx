@@ -15,7 +15,7 @@ export default function SiteHeader() {
     <header className="fixed top-0 left-0 w-full h-16 z-[100] bg-black/40 backdrop-blur-lg border-b border-white/10 shadow-lg flex items-center justify-between px-6 md:px-12 transition-all duration-300">
       {/* Logo */}
       <Link href="/" className="flex flex-col">
-        <span className="text-white text-xl font-bold tracking-widest uppercase">Bubhauz</span>
+        <span className="hidden md:block text-white text-xl font-bold tracking-widest uppercase">Bubhauz</span>
       </Link>
 
       {/* Navigation */}

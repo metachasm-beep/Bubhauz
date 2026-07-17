@@ -1,8 +1,8 @@
 export default function PlayOverlay() {
   return (
     <div className="absolute top-0 left-0 w-full h-[100vh] flex flex-col justify-between py-[15vh] md:py-0 md:justify-center items-center pointer-events-none z-30">
-      <div className="relative z-20 text-center px-4 max-w-5xl mx-auto pointer-events-auto flex flex-col items-center">
-        <h2 className="fold-title text-6xl md:text-8xl lg:text-[7rem] font-bold text-white mb-6 drop-shadow-xl tracking-tight leading-none" style={{ opacity: 0, transform: 'translateY(60px)' }}>
+      <div className="relative z-20 text-center px-6 md:px-12 py-8 md:py-12 max-w-5xl mx-4 md:mx-auto pointer-events-auto flex flex-col items-center glass-card">
+        <h2 className="fold-title text-6xl md:text-8xl lg:text-[7rem] font-bold text-white mb-6 drop-shadow-xl tracking-tight leading-none font-heading" style={{ opacity: 0, transform: 'translateY(60px)' }}>
           Playtime & Toys
         </h2>
         <p className="fold-subtitle text-xl md:text-3xl text-white max-w-3xl mx-auto drop-shadow-lg font-medium opacity-90 mb-10" style={{ opacity: 0, transform: 'translateY(60px)' }}>

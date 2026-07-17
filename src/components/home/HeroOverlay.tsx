@@ -1,8 +1,8 @@
 export default function HeroOverlay() {
   return (
     <div className="hero-overlay-container absolute top-0 left-0 w-full h-[100vh] flex flex-col justify-between py-[15vh] md:py-0 md:justify-center items-center pointer-events-none z-30">
-      <div className="text-center px-4 max-w-4xl mx-auto flex flex-col items-center pointer-events-auto">
-        <div className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 animate-float drop-shadow-2xl flex gap-3 flex-wrap justify-center items-center">
+      <div className="text-center px-6 md:px-12 py-8 md:py-12 max-w-4xl mx-4 md:mx-auto flex flex-col items-center pointer-events-auto glass-card">
+        <div className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 animate-float drop-shadow-2xl flex gap-3 flex-wrap justify-center items-center font-heading">
           <span className="hero-title-word inline-block drop-shadow-xl" style={{ opacity: 0, filter: 'blur(10px)', transform: 'translateY(30px)' }}>Welcome to the</span>
           <span className="hero-title-word text-[var(--primary)] drop-shadow-xl inline-block" style={{ opacity: 0, filter: 'blur(10px)', transform: 'translateY(30px)' }}>Bubhauz</span>
           <span className="hero-title-word inline-block drop-shadow-xl" style={{ opacity: 0, filter: 'blur(10px)', transform: 'translateY(30px)' }}>Family</span>
