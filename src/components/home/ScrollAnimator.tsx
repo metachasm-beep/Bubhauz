@@ -238,6 +238,22 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         
         // --- PHASE: PREVIOUS FOLD HIDE & NEW TEXT IN ---
         tl.add(textInLabel);
+
+        // Snap canvas to frame 0 of the current sequence immediately as text comes in
+        const seqObj = { frame: -1 };
+        if (i < sequencesRef.current.length) {
+          tl.to(seqObj, {
+            frame: 0,
+            duration: 0.1,
+            ease: "none",
+            onUpdate: () => {
+              for(let j=0; j<i; j++) frameTracker[j] = frameCounts[j] - 1;
+              frameTracker[i] = Math.max(0, Math.round(seqObj.frame));
+              for(let j=i+1; j<foldCount; j++) frameTracker[j] = -1;
+              drawFrame(frameTracker);
+            }
+          }, textInLabel);
+        }
         
         // Hide previous fold's wrapper completely (its text is already out, but this prevents clicks/overlap)
         tl.set(`.fold-${i - 1}`, { autoAlpha: 0 }, textInLabel);
@@ -276,7 +292,6 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         
         // If there is a canvas sequence corresponding to this fold transition, play it!
         if (i < sequencesRef.current.length) {
-          const seqObj = { frame: -1 };
           tl.to(seqObj, {
             frame: frameCounts[i] - 1,
             duration: duration,
