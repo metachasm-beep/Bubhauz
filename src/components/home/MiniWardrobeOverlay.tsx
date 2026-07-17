@@ -1,6 +1,6 @@
 export default function MiniWardrobeOverlay() {
   return (
-    <div className="wardrobe-overlay-container absolute top-0 left-0 w-full h-[100vh] flex items-center justify-center pointer-events-none z-30">
+    <div className="wardrobe-overlay-container absolute top-0 left-0 w-full h-[100vh] flex items-end pb-40 md:items-center md:pb-0 justify-center pointer-events-none z-30">
       <div className="relative z-20 text-center px-4 max-w-5xl mx-auto pointer-events-auto">
         <h2 className="fold-title wardrobe-title text-6xl md:text-8xl lg:text-[7rem] font-bold text-white mb-6 drop-shadow-xl tracking-tight leading-none" style={{ opacity: 0, transform: 'translateY(60px)' }}>
           The Mini Wardrobe

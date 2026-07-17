@@ -1,6 +1,6 @@
 export default function HeroOverlay() {
   return (
-    <div className="hero-overlay-container absolute top-0 left-0 w-full h-[100vh] flex items-center justify-center pointer-events-none z-30">
+    <div className="hero-overlay-container absolute top-0 left-0 w-full h-[100vh] flex items-end pb-40 md:items-center md:pb-0 justify-center pointer-events-none z-30">
       <div className="text-center px-4 max-w-4xl mx-auto flex flex-col items-center pointer-events-auto mt-20">
         <div className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 animate-float drop-shadow-2xl flex gap-3 flex-wrap justify-center items-center">
           <span className="hero-title-word inline-block drop-shadow-xl" style={{ opacity: 0, filter: 'blur(10px)', transform: 'translateY(30px)' }}>Welcome to the</span>
