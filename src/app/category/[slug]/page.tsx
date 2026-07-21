@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
+import { getProductsByCategory } from '@/data/products';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -22,25 +23,7 @@ export default async function CategoryPage({ params }: PageProps) {
   };
   const description = descriptions[slug] || "Curated premium selections.";
 
-  // Mock Products generator based on category
-  const generateMockProducts = (category: string) => {
-    const products = [];
-    const count = category === 'wardrobe' ? 6 : category === 'play' ? 4 : 5;
-    
-    for (let i = 1; i <= count; i++) {
-      // Different deterministic seeds for different images
-      const seedId = category.charCodeAt(0) * i * 10;
-      products.push({
-        id: `${category}-${i}`,
-        name: `Premium ${title} Item 0${i}`,
-        price: `₹${(Math.floor(Math.random() * 50) + 10) * 100}`,
-        imageUrl: `https://picsum.photos/seed/${seedId}/600/800`
-      });
-    }
-    return products;
-  };
-
-  const products = generateMockProducts(slug);
+  const products = getProductsByCategory(slug);
 
   return (
     <main className="min-h-screen bg-[#F9F6F0] text-[#111] selection:bg-[#C67D53] selection:text-[#F9F6F0]">

@@ -6,6 +6,7 @@ import { ArrowLeft, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getProductById } from "@/data/products";
 
 interface ProductDetailViewProps {
   id: string;
@@ -15,19 +16,21 @@ export default function ProductDetailView({ id }: ProductDetailViewProps) {
   const router = useRouter();
   const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
 
-  // Parse ID to generate deterministic mock data
-  // id looks like "wardrobe-1" or "nourish-2"
-  const [category, numberStr] = id.split('-');
-  const index = parseInt(numberStr) || 1;
-  const seedId = category.charCodeAt(0) * index * 10;
-  
-  const title = `Premium ${category.charAt(0).toUpperCase() + category.slice(1)} Item 0${index}`;
-  const price = `₹${(index * 10 + 20) * 100}`;
-  const imageUrl = `https://picsum.photos/seed/${seedId}/1200/1600`;
+  const product = getProductById(id);
 
   const toggleAccordion = (val: string) => {
     setActiveAccordion(prev => prev === val ? null : val);
   };
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F9F6F0]">
+        <h1 className="text-2xl font-light">Product not found.</h1>
+      </div>
+    );
+  }
+
+  const { category, name, price, imageUrl, description, materials, shipping } = product;
 
   return (
     <main className="min-h-[100dvh] bg-[#F9F6F0] text-[#111] selection:bg-[#C67D53] selection:text-[#F9F6F0]">
@@ -53,7 +56,7 @@ export default function ProductDetailView({ id }: ProductDetailViewProps) {
         <div className="w-full md:w-1/2 h-[70vh] md:h-screen sticky top-0 bg-[#EFEBE4]">
           <Image 
             src={imageUrl} 
-            alt={title}
+            alt={name}
             fill
             className="object-cover"
             priority
@@ -70,7 +73,7 @@ export default function ProductDetailView({ id }: ProductDetailViewProps) {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tighter leading-tight mb-4 uppercase">
-              {title}
+              {name}
             </h1>
             <p className="text-2xl text-[#C67D53] font-light mb-8">
               {price}
@@ -79,8 +82,7 @@ export default function ProductDetailView({ id }: ProductDetailViewProps) {
             <div className="w-full h-px bg-black/10 mb-8" />
 
             <p className="text-lg leading-relaxed text-[#111]/70 font-light mb-12">
-              Engineered with the finest materials and rigorously tested to exceed global safety standards. 
-              Because your little one deserves nothing less than absolute perfection.
+              {description}
             </p>
 
             {/* Enquire CTA */}
@@ -94,34 +96,6 @@ export default function ProductDetailView({ id }: ProductDetailViewProps) {
 
             {/* Accordions */}
             <div className="flex flex-col border-t border-black/10">
-              {/* Product Details */}
-              <div className="border-b border-black/10">
-                <button 
-                  onClick={() => toggleAccordion('details')}
-                  className="w-full py-6 flex items-center justify-between text-left text-sm uppercase tracking-widest font-medium"
-                >
-                  Product Details
-                  <motion.div animate={{ rotate: activeAccordion === 'details' ? 180 : 0 }}>
-                    <ChevronDown size={16} className="text-[#111]/50" />
-                  </motion.div>
-                </button>
-                <AnimatePresence>
-                  {activeAccordion === 'details' && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <p className="pb-6 text-[#111]/70 font-light leading-relaxed">
-                        Dimensions: 12" x 18" x 4" <br/>
-                        Weight: 1.2 kg <br/>
-                        Suitable for ages 0+ months.
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
 
               {/* Material & Care */}
               <div className="border-b border-black/10">
@@ -143,8 +117,7 @@ export default function ProductDetailView({ id }: ProductDetailViewProps) {
                       className="overflow-hidden"
                     >
                       <p className="pb-6 text-[#111]/70 font-light leading-relaxed">
-                        100% Organic GOTS Certified Cotton. <br/>
-                        Machine wash cold, tumble dry low. Do not bleach.
+                        {materials}
                       </p>
                     </motion.div>
                   )}
@@ -171,8 +144,7 @@ export default function ProductDetailView({ id }: ProductDetailViewProps) {
                       className="overflow-hidden"
                     >
                       <p className="pb-6 text-[#111]/70 font-light leading-relaxed">
-                        Complimentary shipping on orders above ₹5000. <br/>
-                        14-day hassle-free return policy.
+                        {shipping}
                       </p>
                     </motion.div>
                   )}
