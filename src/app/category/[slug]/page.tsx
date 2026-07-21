@@ -26,7 +26,7 @@ export default async function CategoryPage({ params }: PageProps) {
   const products = getProductsByCategory(slug);
 
   return (
-    <main className="min-h-screen bg-[#F9F6F0] text-[#111] selection:bg-[#C67D53] selection:text-[#F9F6F0]">
+    <main className="bg-[#F9F6F0] text-[#111] selection:bg-[#C67D53] selection:text-[#F9F6F0]">
       
       {/* Sleek Floating Back Button */}
       <Link 
@@ -37,47 +37,56 @@ export default async function CategoryPage({ params }: PageProps) {
         <ArrowLeft size={18} />
       </Link>
 
-      <div className="max-w-[1400px] mx-auto px-0 md:px-12 pt-28 pb-12 md:py-32">
-        {/* Category Hero */}
-        <div className="max-w-2xl mb-12 md:mb-24 px-6 md:px-0 mt-8 md:mt-0">
-          <h1 className="text-5xl md:text-7xl font-light tracking-tighter leading-none mb-4 md:mb-6">
-            {title}.
-          </h1>
-          <p className="text-lg md:text-xl text-[#111]/70 leading-relaxed font-light">
-            {description}
-          </p>
-        </div>
+      {/* Mobile Snapping Wrapper */}
+      <div className="h-[100dvh] overflow-y-auto snap-y snap-mandatory hide-scrollbar md:h-auto md:overflow-y-visible md:snap-none">
+        
+        <div className="max-w-[1400px] mx-auto md:px-12 md:pt-28 md:pb-32">
+          
+          {/* Fold 1: Category Hero (Full height on mobile) */}
+          <div className="h-[100dvh] md:h-auto w-full flex flex-col justify-center snap-center snap-always px-6 md:px-0 md:mb-24">
+            <div className="max-w-2xl">
+              <h1 className="text-5xl md:text-7xl font-light tracking-tighter leading-none mb-4 md:mb-6">
+                {title}.
+              </h1>
+              <p className="text-lg md:text-xl text-[#111]/70 leading-relaxed font-light">
+                {description}
+              </p>
+            </div>
+          </div>
 
-        {/* Swipe Carousel (Mobile) / Asymmetric Grid (Desktop) */}
-        <div className="flex overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-x-8 md:gap-y-16 px-6 md:px-0 pb-12 snap-x snap-mandatory hide-scrollbar">
-          {products.map((product, idx) => (
-            <Link 
-              href={`/products/${product.id}`}
-              key={product.id} 
-              className={`group flex flex-col gap-3 cursor-pointer min-w-[75vw] md:min-w-0 snap-center ${idx % 3 === 1 ? 'md:mt-12' : ''}`}
-            >
-              {/* Image Container with Hover zoom */}
-              <div className="relative w-full aspect-[4/5] overflow-hidden bg-white shadow-sm border border-black/5 p-4 flex items-center justify-center rounded-xl md:rounded-none">
-                <div className="relative w-full h-full">
-                  <Image 
-                    src={product.imageUrl} 
-                    alt={product.name}
-                    fill
-                    className="object-contain transition-transform duration-700 ease-out group-hover:scale-105"
-                    sizes="(max-width: 768px) 75vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                </div>
-                
-                {/* Subtle Overlay on hover */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
-              </div>
+          {/* Fold 2: Swipe Carousel (Mobile Full height) / Asymmetric Grid (Desktop) */}
+          <div className="h-[100dvh] md:h-auto w-full flex flex-col justify-center snap-center snap-always">
+            <div className="flex overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-x-8 md:gap-y-16 px-6 md:px-0 pb-12 snap-x snap-mandatory hide-scrollbar">
+              {products.map((product, idx) => (
+                <Link 
+                  href={`/products/${product.id}`}
+                  key={product.id} 
+                  className={`group flex flex-col gap-3 cursor-pointer min-w-[75vw] md:min-w-0 snap-center ${idx % 3 === 1 ? 'md:mt-12' : ''}`}
+                >
+                  {/* Image Container with Hover zoom */}
+                  <div className="relative w-full aspect-[4/5] overflow-hidden bg-white shadow-sm border border-black/5 p-4 flex items-center justify-center rounded-xl md:rounded-none">
+                    <div className="relative w-full h-full">
+                      <Image 
+                        src={product.imageUrl} 
+                        alt={product.name}
+                        fill
+                        className="object-contain transition-transform duration-700 ease-out group-hover:scale-105"
+                        sizes="(max-width: 768px) 75vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                    </div>
+                    
+                    {/* Subtle Overlay on hover */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
+                  </div>
 
-              {/* Product Meta */}
-              <div className="flex justify-between items-start pt-1 px-1">
-                <h3 className="text-xs md:text-sm font-medium tracking-wide uppercase text-[#111]/90">{product.name}</h3>
-              </div>
-            </Link>
-          ))}
+                  {/* Product Meta */}
+                  <div className="flex justify-between items-start pt-1 px-1">
+                    <h3 className="text-xs md:text-sm font-medium tracking-wide uppercase text-[#111]/90">{product.name}</h3>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </main>
