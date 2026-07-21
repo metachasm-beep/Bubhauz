@@ -78,7 +78,6 @@ export default async function CategoryPage({ params }: PageProps) {
               {/* Product Meta */}
               <div className="flex justify-between items-start pt-2">
                 <h3 className="text-sm font-medium tracking-wide uppercase">{product.name}</h3>
-                <span className="text-sm text-[#C67D53]">{product.price}</span>
               </div>
             </Link>
           ))}

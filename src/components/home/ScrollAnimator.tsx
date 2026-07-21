@@ -167,6 +167,175 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       canvasRef.current.height = window.innerHeight;
       drawFrame([0, -1, -1, -1, -1, -1]);
     }
+"use client";
+
+import React, { useEffect, useRef, useState, ReactNode, Children } from "react";
+import Image from "next/image";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
+import SiteFooter from "@/components/ui/SiteFooter";
+
+interface ScrollAnimatorProps {
+  children?: ReactNode;
+}
+
+export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
+  
+  const sequencesRef = useRef<HTMLImageElement[][]>([[], [], [], [], [], []]);
+  const [isReady, setIsReady] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  
+  const frameCounts = [102, 102, 102, 102, 102, 102];
+  
+  const folds = Children.toArray(children);
+
+  // Load images
+  useEffect(() => {
+    if (sequencesRef.current[0].length > 0) return; // Prevent double load in strict mode
+    
+    const configs = [
+      (i: number) => `/heroscroll/${i.toString().padStart(3, "0")}.webp?v=1`,
+      (i: number) => `/scroll2/use_the_clouds_whirlwind_image-ezremove_${i.toString().padStart(3, "0")}.webp?v=1`,
+      (i: number) => `/scroll3/use_the_baby_apparel_image_as-ezremove_${i.toString().padStart(3, "0")}.webp?v=1`,
+      (i: number) => `/scroll4/Basic%20Model-1784277948000_${i.toString().padStart(3, "0")}.webp?v=1`,
+      (i: number) => `/scroll5/use_the_baby_bed_image_as_firs_GStory_1784279637_${i.toString().padStart(3, "0")}.webp?v=1`,
+      (i: number) => `/scroll6/use_the_baby_toys_image_as_fir_GStory_1784280854_${i.toString().padStart(3, "0")}.webp?v=1`
+    ];
+
+    let totalLoaded = 0;
+    const totalFrames = frameCounts.reduce((a, b) => a + b, 0);
+
+    const updateProgress = () => {
+      totalLoaded++;
+      // Throttle state updates to prevent re-render spam
+      if (totalLoaded % 10 === 0 || totalLoaded === totalFrames) {
+        setLoadingProgress(Math.floor((totalLoaded / totalFrames) * 100));
+      }
+      if (totalLoaded === totalFrames) {
+        setIsReady(true);
+      }
+    };
+
+    configs.forEach((getUrl, seqIndex) => {
+      for (let i = 0; i < frameCounts[seqIndex]; i++) {
+        const img = new window.Image();
+        
+        img.onload = () => {
+          updateProgress();
+          if (seqIndex === 0 && i === 0) drawFrame([0, -1, -1, -1, -1, -1]);
+        };
+        
+        img.onerror = () => {
+          console.error(`Failed to load image: ${img.src}`);
+          updateProgress();
+        };
+        
+        img.src = getUrl(i);
+        sequencesRef.current[seqIndex].push(img);
+      }
+    });
+  }, []);
+
+  // Hide global footer on mount so it can be animated in at the end
+  useEffect(() => {
+    const globalFooter = document.getElementById("global-footer");
+    if (globalFooter) {
+      globalFooter.style.position = "fixed";
+      globalFooter.style.bottom = "0";
+      globalFooter.style.left = "0";
+      globalFooter.style.width = "100%";
+      globalFooter.style.zIndex = "40";
+      globalFooter.style.opacity = "0";
+      globalFooter.style.pointerEvents = "none";
+    }
+
+    return () => {
+      if (globalFooter) {
+        globalFooter.style.position = "";
+        globalFooter.style.bottom = "";
+        globalFooter.style.left = "";
+        globalFooter.style.width = "";
+        globalFooter.style.zIndex = "";
+        globalFooter.style.opacity = "";
+        globalFooter.style.pointerEvents = "";
+      }
+    };
+  }, []);
+
+  const drawSingleImage = (img: HTMLImageElement, ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
+    if (!img || !img.complete || img.naturalHeight === 0) return; // Prevent broken image exception
+    
+    const canvasRatio = canvas.width / canvas.height;
+    const imgRatio = img.width / img.height;
+    
+    // Mobile optimization: Use blur-fill to prevent massive cropping on portrait screens
+    if (canvasRatio < 0.8 && imgRatio > 1) { 
+      // 1. Draw blurred cover background
+      let bgWidth = canvas.height * imgRatio;
+      let bgHeight = canvas.height;
+      let bgOffsetX = (canvas.width - bgWidth) / 2;
+      
+      ctx.filter = 'blur(30px) brightness(0.3)';
+      ctx.drawImage(img, bgOffsetX, 0, bgWidth, bgHeight);
+      
+      // 2. Draw contained sharp image perfectly in the center (middle third), zoomed by 15%
+      ctx.filter = 'none';
+      let fgWidth = canvas.width * 1.15;
+      let fgHeight = (canvas.width / imgRatio) * 1.15;
+      let fgOffsetX = (canvas.width - fgWidth) / 2;
+      let fgOffsetY = (canvas.height - fgHeight) / 2; 
+      
+      ctx.drawImage(img, fgOffsetX, fgOffsetY, fgWidth, fgHeight);
+    } else {
+      // Standard cover behavior for desktop
+      let drawWidth = canvas.width;
+      let drawHeight = canvas.height;
+      let offsetX = 0;
+      let offsetY = 0;
+      
+      if (canvasRatio > imgRatio) {
+        drawHeight = canvas.width / imgRatio;
+        offsetY = (canvas.height - drawHeight) / 2;
+      } else {
+        drawWidth = canvas.height * imgRatio;
+        offsetX = (canvas.width - drawWidth) / 2;
+      }
+      
+      ctx.filter = 'none';
+      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+    }
+  };
+
+  const drawFrame = (indices: number[]) => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw each active sequence layered on top of each other
+    indices.forEach((frameIdx, seqIdx) => {
+      if (frameIdx >= 0 && sequencesRef.current[seqIdx] && sequencesRef.current[seqIdx].length > 0) {
+        const img = sequencesRef.current[seqIdx][Math.round(frameIdx)];
+        if (img) drawSingleImage(img, ctx, canvas);
+      }
+    });
+  };
+
+  // GSAP Observer Sequence (Zero Physical Scroll, Universal Parallax Folds)
+  useEffect(() => {
+    if (!isReady || !containerRef.current) return;
+
+    if (canvasRef.current) {
+      canvasRef.current.width = window.innerWidth;
+      canvasRef.current.height = window.innerHeight;
+      drawFrame([0, -1, -1, -1, -1, -1]);
+    }
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -174,7 +343,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
           trigger: containerRef.current,
           pin: true,
           start: "top top",
-          end: "+=14000", // Doubled to reduce scroll animation speed to 50%
+          end: () => window.innerWidth < 768 ? "+=7000" : "+=14000", // Faster scroll on mobile
           scrub: 1.5, // Smooth lag
         }
       });

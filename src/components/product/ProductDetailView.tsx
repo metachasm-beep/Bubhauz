@@ -72,12 +72,9 @@ export default function ProductDetailView({ id }: ProductDetailViewProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tighter leading-tight mb-4 uppercase">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tighter leading-tight mb-8 uppercase">
               {name}
             </h1>
-            <p className="text-2xl text-[#C67D53] font-light mb-8">
-              {price}
-            </p>
 
             <div className="w-full h-px bg-black/10 mb-8" />
 
