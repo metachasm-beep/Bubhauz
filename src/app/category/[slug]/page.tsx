@@ -64,7 +64,7 @@ export default async function CategoryPage({ params }: PageProps) {
                   className={`group flex flex-col gap-3 cursor-pointer min-w-[75vw] md:min-w-0 snap-center ${idx % 3 === 1 ? 'md:mt-12' : ''}`}
                 >
                   {/* Image Container with Hover zoom */}
-                  <div className="relative w-full aspect-[4/5] overflow-hidden bg-white shadow-sm border border-black/5 p-4 flex items-center justify-center rounded-xl md:rounded-none">
+                  <div className="relative w-full aspect-[4/5] overflow-hidden bg-white shadow-sm border border-black/5 flex items-center justify-center rounded-xl md:rounded-none">
                     <div className="relative w-full h-full">
                       <Image 
                         src={product.imageUrl} 
