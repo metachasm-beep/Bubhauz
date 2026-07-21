@@ -53,15 +53,17 @@ export default function ProductDetailView({ id }: ProductDetailViewProps) {
       <div className="flex flex-col md:flex-row min-h-screen">
         
         {/* Left: Image (Sticky on Desktop) */}
-        <div className="w-full md:w-1/2 h-[70vh] md:h-screen sticky top-0 bg-[#EFEBE4]">
-          <Image 
-            src={imageUrl} 
-            alt={name}
-            fill
-            className="object-cover"
-            priority
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
+        <div className="w-full md:w-1/2 h-[50vh] md:h-screen sticky top-0 bg-[#EFEBE4] flex items-center justify-center p-4">
+          <div className="relative w-full h-full">
+            <Image 
+              src={imageUrl} 
+              alt={name}
+              fill
+              className="object-contain"
+              priority
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
         </div>
 
         {/* Right: Details */}

@@ -62,14 +62,16 @@ export default async function CategoryPage({ params }: PageProps) {
               className={`group flex flex-col gap-4 cursor-pointer ${idx % 3 === 1 ? 'md:mt-12' : ''}`}
             >
               {/* Image Container with Hover zoom */}
-              <div className="relative aspect-[3/4] w-full overflow-hidden bg-white shadow-sm border border-black/5">
-                <Image 
-                  src={product.imageUrl} 
-                  alt={product.name}
-                  fill
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
+              <div className="relative w-full h-[60vh] md:aspect-[3/4] md:h-auto overflow-hidden bg-white shadow-sm border border-black/5 p-4 flex items-center justify-center">
+                <div className="relative w-full h-full">
+                  <Image 
+                    src={product.imageUrl} 
+                    alt={product.name}
+                    fill
+                    className="object-contain transition-transform duration-700 ease-out group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                </div>
                 
                 {/* Subtle Overlay on hover */}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500" />
