@@ -241,7 +241,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
           ease: "power2.out" 
         }, `${textInLabel}+=0.2`);
         
-        tl.to({}, { duration: 3 }); // Pause for user to read
+        tl.to({}, { duration: 10 }); // Increased pause for user to read to create a "scroll stall"
         
         // --- PHASE: TEXT OUT FOR FOLD i ---
         if (i < foldCount - 1) {

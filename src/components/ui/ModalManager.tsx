@@ -128,16 +128,19 @@ export default function ModalManager({ activeModal, onClose }: ModalManagerProps
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed inset-0 z-[150] flex items-center justify-center bg-black/60 backdrop-blur-2xl p-4 md:p-12"
+          className="fixed inset-0 z-[150] overflow-y-auto bg-black/60 backdrop-blur-2xl"
           onClick={onClose}
         >
-          {/* Close Button */}
+          {/* Close Button - Fixed to viewport */}
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 md:top-10 md:right-10 text-[#F9F6F0]/50 hover:text-[#F9F6F0] transition-colors p-2 z-[160]"
+            className="fixed top-6 right-6 md:top-10 md:right-10 text-[#F9F6F0]/50 hover:text-[#F9F6F0] transition-colors p-2 z-[160]"
           >
             <X size={32} strokeWidth={1} />
           </button>
+
+          {/* Scrollable centering wrapper */}
+          <div className="min-h-full flex flex-col items-center justify-center p-4 py-24 md:p-12">
 
           {/* Modal Container */}
           <motion.div
@@ -150,6 +153,7 @@ export default function ModalManager({ activeModal, onClose }: ModalManagerProps
           >
             {renderContent()}
           </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
