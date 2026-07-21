@@ -67,7 +67,10 @@ export default function ModalManager({ activeModal, onClose }: ModalManagerProps
             <p className="text-lg md:text-xl text-[#F9F6F0]/70 font-light max-w-lg mb-12">
               Every Bubhauz product undergoes rigorous independent testing to exceed global safety standards. Because nothing matters more.
             </p>
-            <button className="border border-[#F9F6F0]/20 text-[#F9F6F0] px-8 py-4 rounded-full text-sm uppercase tracking-widest hover:bg-[#F9F6F0] hover:text-[#111] transition-all">
+            <button 
+              onClick={() => alert("The comprehensive 2026 Safety Report PDF is currently being updated. Please check back soon.")}
+              className="border border-[#F9F6F0]/20 text-[#F9F6F0] px-8 py-4 rounded-full text-sm uppercase tracking-widest hover:bg-[#F9F6F0] hover:text-[#111] transition-all"
+            >
               Read Safety Report
             </button>
           </div>
