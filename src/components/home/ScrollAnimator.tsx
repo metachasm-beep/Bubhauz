@@ -27,12 +27,12 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
   const folds = Children.toArray(children);
 
   const mobileImages = [
-    `/heroscroll/000.webp?v=1`,
-    `/scroll2/use_the_clouds_whirlwind_image-ezremove_101.webp?v=1`,
-    `/scroll3/use_the_baby_apparel_image_as-ezremove_101.webp?v=1`,
-    `/scroll4/Basic%20Model-1784277948000_101.webp?v=1`,
-    `/scroll5/use_the_baby_bed_image_as_firs_GStory_1784279637_101.webp?v=1`,
-    `/scroll6/use_the_baby_toys_image_as_fir_GStory_1784280854_101.webp?v=1`,
+    `/heroscroll/000.webp`,
+    `/scroll2/use_the_clouds_whirlwind_image-ezremove_101.webp`,
+    `/scroll3/use_the_baby_apparel_image_as-ezremove_101.webp`,
+    `/scroll4/Basic%20Model-1784277948000_101.webp`,
+    `/scroll5/use_the_baby_bed_image_as_firs_GStory_1784279637_101.webp`,
+    `/scroll6/use_the_baby_toys_image_as_fir_GStory_1784280854_101.webp`,
   ];
 
   useEffect(() => {
