@@ -297,10 +297,10 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
 
   if (isMobile) {
     return (
-      <main className="relative w-full h-[100dvh] overflow-y-auto snap-y snap-mandatory hide-scrollbar bg-black text-white">
+      <main className="relative w-full h-[100dvh] bg-black text-white overflow-hidden">
         
         {/* Sticky Crossfade Backgrounds */}
-        <div className="fixed inset-0 w-full h-full z-0 pointer-events-none">
+        <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
           {mobileImages.map((src, idx) => (
             <div 
               key={idx}
@@ -320,17 +320,15 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         </div>
 
         {/* Foreground Content */}
-        <div className="relative z-20 w-full">
+        <div className="absolute inset-0 z-20 w-full h-full overflow-y-auto snap-y snap-mandatory hide-scrollbar">
           {folds.map((child, index) => (
             <div 
               key={index}
               ref={(el) => { foldRefs.current[index] = el; }}
               className="w-full h-[100dvh] snap-center snap-always flex items-center justify-center pointer-events-auto"
             >
-              <div className="w-full h-full relative">
-                 <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center">
-                   {child}
-                 </div>
+              <div className="w-full h-full relative flex flex-col items-center justify-center">
+                 {child}
               </div>
             </div>
           ))}
