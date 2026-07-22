@@ -6,7 +6,6 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
-import SiteFooter from "@/components/ui/SiteFooter";
 
 interface ScrollAnimatorProps {
   children?: ReactNode;
@@ -20,13 +19,42 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
   const [isReady, setIsReady] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+  const [activeFold, setActiveFold] = useState(0);
+  const foldRefs = useRef<(HTMLDivElement | null)[]>([]);
+
   const frameCounts = [102, 102, 102, 102, 102, 102];
-  
   const folds = Children.toArray(children);
+
+  const mobileImages = [
+    `/heroscroll/000.webp?v=1`,
+    `/scroll2/use_the_clouds_whirlwind_image-ezremove_101.webp?v=1`,
+    `/scroll3/use_the_baby_apparel_image_as-ezremove_101.webp?v=1`,
+    `/scroll4/Basic%20Model-1784277948000_101.webp?v=1`,
+    `/scroll5/use_the_baby_bed_image_as_firs_GStory_1784279637_101.webp?v=1`,
+    `/scroll6/use_the_baby_toys_image_as_fir_GStory_1784280854_101.webp?v=1`,
+  ];
+
+  useEffect(() => {
+    const mobileCheck = window.innerWidth < 768;
+    setIsMobile(mobileCheck);
+    
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Load images
   useEffect(() => {
-    if (sequencesRef.current[0].length > 0) return; // Prevent double load in strict mode
+    if (isMobile === null) return; // Wait for mobile check
+    if (isMobile) {
+      // On mobile, just mark as ready since we use native Image tags
+      setIsReady(true);
+      setLoadingProgress(100);
+      return;
+    }
+
+    if (sequencesRef.current[0].length > 0) return; // Prevent double load
     
     const configs = [
       (i: number) => `/heroscroll/${i.toString().padStart(3, "0")}.webp?v=1`,
@@ -42,7 +70,6 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
 
     const updateProgress = () => {
       totalLoaded++;
-      // Throttle state updates to prevent re-render spam
       if (totalLoaded % 10 === 0 || totalLoaded === totalFrames) {
         setLoadingProgress(Math.floor((totalLoaded / totalFrames) * 100));
       }
@@ -61,7 +88,6 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         };
         
         img.onerror = () => {
-          console.error(`Failed to load image: ${img.src}`);
           updateProgress();
         };
         
@@ -69,7 +95,40 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         sequencesRef.current[seqIndex].push(img);
       }
     });
-  }, []);
+  }, [isMobile]);
+
+  // Mobile Intersection Observer for active fold
+  useEffect(() => {
+    if (!isMobile) return;
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const index = foldRefs.current.indexOf(entry.target as HTMLDivElement);
+          if (index !== -1) {
+            setActiveFold(index);
+            // Quick stagger in animation for elements in the active fold
+            gsap.fromTo(
+              entry.target.querySelectorAll('.animate-up'),
+              { opacity: 0, y: 20, filter: "blur(10px)" },
+              { opacity: 1, y: 0, filter: "blur(0px)", stagger: 0.1, duration: 1, ease: "power2.out" }
+            );
+          }
+        } else {
+          // Fade out when leaving
+          gsap.to(entry.target.querySelectorAll('.animate-up'), {
+            opacity: 0, filter: "blur(10px)", duration: 0.5
+          });
+        }
+      });
+    }, { threshold: 0.5 }); // Trigger when 50% of the fold is visible
+
+    foldRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
+  }, [isMobile, isReady]);
 
   // Hide global footer on mount so it can be animated in at the end
   useEffect(() => {
@@ -98,47 +157,26 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
   }, []);
 
   const drawSingleImage = (img: HTMLImageElement, ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
-    if (!img || !img.complete || img.naturalHeight === 0) return; // Prevent broken image exception
+    if (!img || !img.complete || img.naturalHeight === 0) return; 
     
     const canvasRatio = canvas.width / canvas.height;
     const imgRatio = img.width / img.height;
     
-    // Mobile optimization: Use blur-fill to prevent massive cropping on portrait screens
-    if (canvasRatio < 0.8 && imgRatio > 1) { 
-      // 1. Draw blurred cover background
-      let bgWidth = canvas.height * imgRatio;
-      let bgHeight = canvas.height;
-      let bgOffsetX = (canvas.width - bgWidth) / 2;
-      
-      ctx.filter = 'blur(30px) brightness(0.3)';
-      ctx.drawImage(img, bgOffsetX, 0, bgWidth, bgHeight);
-      
-      // 2. Draw contained sharp image perfectly in the center (middle third), zoomed by 15%
-      ctx.filter = 'none';
-      let fgWidth = canvas.width * 1.15;
-      let fgHeight = (canvas.width / imgRatio) * 1.15;
-      let fgOffsetX = (canvas.width - fgWidth) / 2;
-      let fgOffsetY = (canvas.height - fgHeight) / 2; 
-      
-      ctx.drawImage(img, fgOffsetX, fgOffsetY, fgWidth, fgHeight);
+    let drawWidth = canvas.width;
+    let drawHeight = canvas.height;
+    let offsetX = 0;
+    let offsetY = 0;
+    
+    if (canvasRatio > imgRatio) {
+      drawHeight = canvas.width / imgRatio;
+      offsetY = (canvas.height - drawHeight) / 2;
     } else {
-      // Standard cover behavior for desktop
-      let drawWidth = canvas.width;
-      let drawHeight = canvas.height;
-      let offsetX = 0;
-      let offsetY = 0;
-      
-      if (canvasRatio > imgRatio) {
-        drawHeight = canvas.width / imgRatio;
-        offsetY = (canvas.height - drawHeight) / 2;
-      } else {
-        drawWidth = canvas.height * imgRatio;
-        offsetX = (canvas.width - drawWidth) / 2;
-      }
-      
-      ctx.filter = 'none';
-      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+      drawWidth = canvas.height * imgRatio;
+      offsetX = (canvas.width - drawWidth) / 2;
     }
+    
+    ctx.filter = 'none';
+    ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
   };
 
   const drawFrame = (indices: number[]) => {
@@ -149,7 +187,6 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw each active sequence layered on top of each other
     indices.forEach((frameIdx, seqIdx) => {
       if (frameIdx >= 0 && sequencesRef.current[seqIdx] && sequencesRef.current[seqIdx].length > 0) {
         const img = sequencesRef.current[seqIdx][Math.round(frameIdx)];
@@ -158,9 +195,9 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     });
   };
 
-  // GSAP Observer Sequence (Zero Physical Scroll, Universal Parallax Folds)
+  // GSAP Observer Sequence for Desktop
   useEffect(() => {
-    if (!isReady || !containerRef.current) return;
+    if (isMobile === null || isMobile || !isReady || !containerRef.current) return;
 
     if (canvasRef.current) {
       canvasRef.current.width = window.innerWidth;
@@ -174,28 +211,23 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
           trigger: containerRef.current,
           pin: true,
           start: "top top",
-          end: () => window.innerWidth < 768 ? "+=7000" : "+=14000", // Faster scroll on mobile
-          scrub: 1.5, // Smooth lag
+          end: "+=14000",
+          scrub: 1.5,
         }
       });
       const foldCount = folds.length;
 
-            // INITIAL STATE SETUP
-      gsap.set(".fold-wrapper", { autoAlpha: 0 }); // ALL text starts hidden
+      gsap.set(".fold-wrapper", { autoAlpha: 0 });
 
-      const frameTracker = [-1, -1, -1, -1, -1, -1]; // Tracks the current frame of each sequence
-      frameTracker[0] = 0; // Initialize canvas at frame 0 of heroscroll
+      const frameTracker = [-1, -1, -1, -1, -1, -1];
+      frameTracker[0] = 0; 
       
-      // ============================================
-      // UNIVERSAL PARALLAX SLIDER (Folds 0 to 5)
-      // ============================================
       for (let i = 0; i < foldCount; i++) {
         const animLabel = `canvas-anim-${i}`;
         const textInLabel = `text-in-${i}`;
         const textOutLabel = `text-out-${i}`;
         const duration = 8;
         
-        // --- PHASE: CANVAS ANIMATION (Sequence i) ---
         tl.add(animLabel);
         if (i < sequencesRef.current.length) {
           const seqObj = { frame: 0 };
@@ -212,27 +244,18 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
           }, animLabel);
         }
         
-        tl.to({}, { duration: 1 }); // Pause after sequence completes
+        tl.to({}, { duration: 1 });
         
-        // --- PHASE: TEXT IN FOR FOLD i ---
         tl.add(textInLabel);
         
-        // Hide previous fold's wrapper completely
         if (i > 0) tl.set(`.fold-${i - 1}`, { autoAlpha: 0 }, textInLabel);
         
-        // Fade in current fold's wrapper over the END frame of sequence i
         tl.to(`.fold-${i}`, { 
            autoAlpha: 1, 
            duration: 2,
            ease: "power2.inOut",
-           onStart: () => {
-             if (typeof navigator !== 'undefined' && navigator.vibrate) {
-               navigator.vibrate(50);
-             }
-           }
         }, textInLabel);
         
-        // Animate the text elements IN (Kinetic Blur - Option A)
         tl.to(`.fold-${i} .animate-up`, { 
           opacity: 1, 
           filter: "blur(0px)",
@@ -241,9 +264,8 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
           ease: "power2.out" 
         }, `${textInLabel}+=0.2`);
         
-        tl.to({}, { duration: 10 }); // Increased pause for user to read to create a "scroll stall"
+        tl.to({}, { duration: 10 });
         
-        // --- PHASE: TEXT OUT FOR FOLD i ---
         if (i < foldCount - 1) {
           tl.add(textOutLabel);
           tl.to(`.fold-${i} .animate-up`, {
@@ -254,11 +276,10 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
           }, textOutLabel);
         }
       }
-
     }, containerRef);
 
     const handleResize = () => {
-      if (canvasRef.current) {
+      if (canvasRef.current && !isMobile) {
         canvasRef.current.width = window.innerWidth;
         canvasRef.current.height = window.innerHeight;
         drawFrame([frameCounts[0] - 1, -1, -1, -1, -1, -1]);
@@ -270,13 +291,59 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       ctx.revert();
       window.removeEventListener("resize", handleResize);
     };
-  }, [isReady, folds.length]);
+  }, [isReady, folds.length, isMobile]);
 
+  if (isMobile === null) return <div className="h-screen w-full bg-black" />; // Prevent hydration mismatch
+
+  if (isMobile) {
+    return (
+      <main className="relative w-full h-[100dvh] overflow-y-auto snap-y snap-mandatory hide-scrollbar bg-black text-white">
+        
+        {/* Sticky Crossfade Backgrounds */}
+        <div className="fixed inset-0 w-full h-full z-0 pointer-events-none">
+          {mobileImages.map((src, idx) => (
+            <div 
+              key={idx}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${activeFold === idx ? 'opacity-100' : 'opacity-0'}`}
+            >
+              <Image 
+                src={src} 
+                alt={`Background ${idx}`}
+                fill
+                priority={idx === 0}
+                className="object-cover"
+              />
+            </div>
+          ))}
+          {/* Subtle overlay to ensure text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/80 z-10 pointer-events-none" />
+        </div>
+
+        {/* Foreground Content */}
+        <div className="relative z-20 w-full">
+          {folds.map((child, index) => (
+            <div 
+              key={index}
+              ref={(el) => { foldRefs.current[index] = el; }}
+              className="w-full h-[100dvh] snap-center snap-always flex items-center justify-center pointer-events-auto"
+            >
+              <div className="w-full h-full relative">
+                 <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center">
+                   {child}
+                 </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
+    );
+  }
+
+  // DESKTOP RENDER (Canvas Scrub)
   return (
     <section ref={containerRef} style={{ height: "100vh", position: "relative", overflow: "hidden" }}>
       <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100vh", overflow: "hidden", backgroundColor: "#000" }}>
         
-        {/* Fallback Image */}
         <div className={`absolute inset-0 z-0 transition-opacity duration-700 ${isReady ? 'opacity-0' : 'opacity-100'}`}>
             <Image src="/heroscroll/000.webp" alt="Hero Background" fill className="object-cover" priority />
         </div>
@@ -287,10 +354,8 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
           style={{ width: "100%", height: "100%", display: "block", transformOrigin: "center center" }}
         />
         
-        {/* Subtle overlay to ensure text is readable over the canvas without glass cards */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/60 z-10 pointer-events-none" />
 
-        {/* UNIVERSAL FOLDS CONTAINER */}
         <div className="universal-folds-container absolute inset-0 z-20 pointer-events-none">
           {folds.map((child, index) => (
              <div 
@@ -302,7 +367,6 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
           ))}
         </div>
 
-        {/* Elegant Preloader Overlay */}
         <div 
           className={`absolute inset-0 z-[100] bg-black flex flex-col items-center justify-center transition-opacity duration-1000 ${loadingProgress >= 100 ? 'opacity-0 pointer-events-none' : 'opacity-100 pointer-events-auto'}`}
         >
