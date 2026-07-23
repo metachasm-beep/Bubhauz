@@ -104,7 +104,10 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
       </div>
 
       {/* Foreground Content */}
-      <div className="absolute inset-0 z-20 w-full h-full overflow-y-auto snap-y snap-mandatory hide-scrollbar">
+      <div 
+        className="absolute inset-0 z-20 w-full h-full overflow-y-auto snap-y snap-mandatory hide-scrollbar"
+        data-lenis-prevent="true"
+      >
         {folds.map((child, index) => (
           <div 
             key={index}
