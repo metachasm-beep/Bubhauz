@@ -76,6 +76,8 @@ export default function SplashCursor({
 
     let pointers: Pointer[] = [pointerPrototype()];
 
+    const isMobile = window.innerWidth < 768 || /iPad|iPhone|iPod/.test(navigator.userAgent);
+
     let config = {
       SIM_RESOLUTION: SIM_RESOLUTION!,
       DYE_RESOLUTION: DYE_RESOLUTION!,
@@ -85,8 +87,8 @@ export default function SplashCursor({
       PRESSURE: PRESSURE!,
       PRESSURE_ITERATIONS: PRESSURE_ITERATIONS!,
       CURL: CURL!,
-      SPLAT_RADIUS: SPLAT_RADIUS!,
-      SPLAT_FORCE: SPLAT_FORCE!,
+      SPLAT_RADIUS: isMobile ? SPLAT_RADIUS! * 2 : SPLAT_RADIUS!,
+      SPLAT_FORCE: isMobile ? SPLAT_FORCE! * 1.5 : SPLAT_FORCE!,
       SHADING,
       COLOR_UPDATE_SPEED: COLOR_UPDATE_SPEED!,
       PAUSED: false,
