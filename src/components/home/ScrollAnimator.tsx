@@ -80,6 +80,16 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
     };
   }, []);
 
+  const [progress, setProgress] = useState(0);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const scrollHeight = target.scrollHeight - target.clientHeight;
+    if (scrollHeight <= 0) return;
+    const currentScroll = target.scrollTop;
+    setProgress((currentScroll / scrollHeight) * 100);
+  };
+
   return (
     <main className="relative w-full h-[100dvh] bg-black text-white overflow-hidden">
       
@@ -116,10 +126,36 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/80 z-10 pointer-events-none" />
       </div>
 
+      {/* Vertical Progress Bar & Navigation Dots */}
+      <div className="fixed right-8 top-1/2 -translate-y-1/2 h-48 w-[2px] bg-white/10 z-50 hidden md:block rounded-full pointer-events-auto">
+        <div 
+          className="absolute top-0 left-0 w-full bg-white rounded-full transition-all duration-100 ease-out"
+          style={{ height: `${Math.max(0, Math.min(100, progress))}%`, boxShadow: "0 0 10px rgba(255,255,255,0.5)" }}
+        />
+        {/* Indicators for folds */}
+        {folds.map((_, idx) => {
+          const topPercent = folds.length > 1 ? (idx / (folds.length - 1)) * 100 : 0;
+          return (
+            <button
+              key={idx}
+              onClick={() => {
+                foldRefs.current[idx]?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className={`absolute left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-300 cursor-pointer ${
+                activeFold === idx ? "bg-white w-2.5 h-2.5 shadow-[0_0_10px_rgba(255,255,255,0.8)]" : "bg-white/50 w-1.5 h-1.5 hover:bg-white/80 hover:w-2 hover:h-2"
+              }`}
+              style={{ top: `${topPercent}%` }}
+              aria-label={`Go to fold ${idx + 1}`}
+            />
+          );
+        })}
+      </div>
+
       {/* Foreground Content */}
       <div 
         className="absolute inset-0 z-20 w-full h-full overflow-y-auto snap-y snap-mandatory hide-scrollbar"
         data-lenis-prevent="true"
+        onScroll={handleScroll}
       >
         {folds.map((child, index) => (
           <div 
