@@ -43,11 +43,6 @@ body {
   padding: 0;
   overflow-x: hidden;
   scroll-behavior: smooth;
-  cursor: none !important;
-}
-
-* {
-  cursor: none !important;
 }
 
 /* Glassmorphism utilities */
