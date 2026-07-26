@@ -91,7 +91,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${activeFold === idx ? 'opacity-100' : 'opacity-0'}`}
           >
             {/* Desktop / Landscape Image */}
-            <div className="hidden md:block landscape:block absolute inset-0">
+            <div className="hero-bg-desktop absolute inset-0">
               <Image 
                 src={src} 
                 alt={`Background ${idx}`}
@@ -101,7 +101,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
               />
             </div>
             {/* Mobile Portrait Image */}
-            <div className="block md:hidden landscape:hidden absolute inset-0">
+            <div className="hero-bg-mobile absolute inset-0">
               <Image 
                 src={`/mobile/fold_${idx + 1}.webp`} 
                 alt={`Mobile Background ${idx}`}
