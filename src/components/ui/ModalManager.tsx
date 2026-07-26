@@ -18,6 +18,13 @@ export default function ModalManager({ activeModal, onClose }: ModalManagerProps
   
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.name || !formData.email || !formData.message) {
+      setFormStatus("error");
+      setTimeout(() => setFormStatus("idle"), 3000);
+      return;
+    }
+
     setFormStatus("loading");
     
     try {
@@ -140,7 +147,6 @@ export default function ModalManager({ activeModal, onClose }: ModalManagerProps
                     <div className="border-b border-[#F9F6F0]/20 pb-2 focus-within:border-[#F9F6F0]/60 transition-colors">
                       <input 
                         type="text" 
-                        required
                         placeholder="Name" 
                         value={formData.name}
                         onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
@@ -150,7 +156,6 @@ export default function ModalManager({ activeModal, onClose }: ModalManagerProps
                     <div className="border-b border-[#F9F6F0]/20 pb-2 focus-within:border-[#F9F6F0]/60 transition-colors">
                       <input 
                         type="email" 
-                        required
                         placeholder="Email" 
                         value={formData.email}
                         onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
@@ -160,7 +165,6 @@ export default function ModalManager({ activeModal, onClose }: ModalManagerProps
                     <div className="border-b border-[#F9F6F0]/20 pb-2 focus-within:border-[#F9F6F0]/60 transition-colors">
                       <textarea 
                         placeholder="Message" 
-                        required
                         rows={3} 
                         value={formData.message}
                         onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
