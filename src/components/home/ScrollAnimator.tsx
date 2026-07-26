@@ -103,7 +103,7 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
             {/* Mobile Portrait Image */}
             <div className="block md:hidden landscape:hidden absolute inset-0">
               <Image 
-                src={`/mobile/fold%20${idx + 1}.png`} 
+                src={`/mobile/fold_${idx + 1}.webp`} 
                 alt={`Mobile Background ${idx}`}
                 fill
                 priority={idx === 0}
