@@ -5,7 +5,6 @@ import SiteFooter from "@/components/ui/SiteFooter";
 import CookieConsent from "@/components/ui/CookieConsent";
 import SmoothScrolling from "@/components/ui/SmoothScrolling";
 import SplashCursor from "@/components/react-bits/SplashCursor";
-import LandscapePrompt from "@/components/ui/LandscapePrompt";
 
 export const metadata: Metadata = {
   title: "Bubhauz - Safe, Premium Baby Essentials",
@@ -21,7 +20,6 @@ export default function RootLayout({
     <html lang="en" className="antialiased">
       <body className="min-h-screen flex flex-col">
         <SmoothScrolling>
-          <LandscapePrompt />
           <SiteHeader />
           <div className="fixed inset-0 z-50 pointer-events-none">
             <SplashCursor />

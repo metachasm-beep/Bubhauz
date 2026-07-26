@@ -90,12 +90,21 @@ export default function ScrollAnimator({ children }: ScrollAnimatorProps) {
             key={idx}
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${activeFold === idx ? 'opacity-100' : 'opacity-0'}`}
           >
+            {/* Desktop / Landscape Image */}
             <Image 
               src={src} 
               alt={`Background ${idx}`}
               fill
               priority={idx === 0}
-              className="object-cover"
+              className="object-cover hidden md:block landscape:block"
+            />
+            {/* Mobile Portrait Image */}
+            <Image 
+              src={`/mobile/fold ${idx + 1}.png`} 
+              alt={`Mobile Background ${idx}`}
+              fill
+              priority={idx === 0}
+              className="object-cover block md:hidden landscape:hidden"
             />
           </div>
         ))}
